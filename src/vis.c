@@ -6,6 +6,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <vis.h>
 #define STEP_SIZE 2
 
@@ -75,6 +79,35 @@ void remove_vis_block(int block_size, int x_pos, int y_pos) {
 void render_vis_grid(int size) {
     printf("\x1b[%dB", size);
     fflush(stdout);
+}
+
+bool init_terminal() {
+    bool is_successful = true;
+
+#ifdef _WIN32
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if(hOut == INVALID_HANDLE_VALUE) {
+        is_successful = false;
+    }
+    DWORD dwMode = 0;
+    if(!GetConsoleMode(hOut, &dwMode)) {
+        is_successful = false;
+    }
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    if(!SetConsoleMode(hOut, dwMode)) {
+        is_successful = false;
+    }
+
+    if(!is_successful) {
+        printf("Couldn't enable virtual terminal processing.\n");
+        printf("Disabling Visualizer.\n");
+        return;
+    }
+
+    SetConsoleOutputCP(CP_UTF8);
+#endif
+
+    return is_successful;
 }
 
 void prep_vis_grid(int size) {

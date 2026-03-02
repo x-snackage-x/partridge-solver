@@ -1,8 +1,10 @@
 #pragma once
 
+#include <stdbool.h>
+
 #define TESTING
 
-typedef enum {
+typedef enum COLOR {
     BLACK = 0,
     RED = 1,
     GREEN = 2,
@@ -22,6 +24,7 @@ typedef enum {
     DARKGRAY = 235
 } COLOR;
 
+bool init_terminal();
 void prep_vis_grid(int size);
 void render_vis_grid(int size);
 void reset_vis_grid(int size);

@@ -25,7 +25,7 @@ typedef enum RETURN_CODES {
 
 // Only size is expected to be set
 // size := dimension of the larges tile
-void init_puzzle(puzzle_def* puzzle);
+void init_puzzle(puzzle_def* puzzle, bool override);
 
 RETURN_CODES place_block(puzzle_def* puzzle,
                          int block_id,

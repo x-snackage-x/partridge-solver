@@ -6,26 +6,30 @@ https://github.com/user-attachments/assets/3a07d338-07fe-4609-9ce8-4c470945a787
 
 ## Usage
 
-The solver is implemented as a consol program that can be called with three optional command line arguments. Passing an integer will be interpreted as the desired puzzle definition type i.e. the size of the largest tile. The flags `{vis/novis} {fulllog/nofulllog}` can activate the visualizer and the full log.  
-The defaults are: `8 novis nofulllog`  
+The solver is implemented as a console program that can be called with three optional command line arguments. Passing an integer will be interpreted as the desired puzzle definition type i.e. the size of the largest tile. The flags `{vis|novis} {fulllog|nofulllog} {override|nooverride}` can activate the visualizer, the full log and overriding the protection for unsolvable puzzles.  
+The defaults are: `8 novis nofulllog nooverride`  
 
 ```shell
-wd$: ./sol.out {integer} {vis/novis} {fulllog/nofulllog}
+wd$: ./sol.out {integer} {vis|novis} {fulllog|nofulllog} {override|nooverride}
 ```
 Currently, the terminal visualizer will only work for grid sizes and terminal window sizes that don't result in scrolling behavior.
 
 A `makefile` is provided for building the project as either a Linux or Windows application. 
 
-## Usefull links puzzle
+## Useful links puzzle
 
 More info on the puzzle can be found here:
 
 - The Partridge Puzzle by Robert T. Wainwright: https://www.mathpuzzle.com/partridge.html
-- Matt Scroggs web interactive "Squares": https://www.mscroggs.co.uk/squares/
+- Matt Scroggs' blog on the subject: https://www.mscroggs.co.uk/blog/119
+- Matt Scroggs' web interactive "Squares": https://www.mscroggs.co.uk/squares/
+- Potapov Danila's blog about programming a solution finder: https://habr.com/ru/articles/889410/
+- OEIS sequence for number of solutions: https://oeis.org/A381976
 
-## Usefull links project 
 
-Sources that were usefull while implementing the project.
+## Useful links project 
+
+Sources that were useful while implementing the project.
 
 WASM Stuff:
 - https://developer.mozilla.org/en-US/docs/WebAssembly
@@ -36,7 +40,7 @@ Visualizer Stuff:
 - https://www.uninformativ.de/blog/postings/2016-12-17/0/POSTING-en.html i.e. use ▀▀
 - https://notes.burke.libbey.me/ansi-escape-codes/
 
-Make File starting guide:
+Makefile starting guide:
 - https://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/
 
 ## Open Tasks/Improvements:

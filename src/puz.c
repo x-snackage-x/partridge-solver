@@ -3,8 +3,8 @@
 
 #include <puz.h>
 
-void init_puzzle(puzzle_def* puzzle) {
-    if(puzzle->size > 1 && puzzle->size < 8) {
+void init_puzzle(puzzle_def* puzzle, bool override) {
+    if(!override && puzzle->size > 1 && puzzle->size < 8) {
         printf(
             "The Partridge puzzle has no solutions for sizes between(inc) 2 "
             "and 7.\n");
