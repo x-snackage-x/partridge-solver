@@ -96,17 +96,42 @@ void dynarr_remove_n(dynarr_head* const ptr_head,
     ptr_head->dynarr_size -= n_elements;
 }
 
+char* dynarr_concat(dynarr_head* const ptr_array_dest,
+                    dynarr_head* const ptr_array_src) {
+    assert(ptr_array_dest->elem_size == ptr_array_src->elem_size &&
+           "Element sizes of dyn-arrays to be concatenated must be the same");
+    size_t available_space =
+        ptr_array_dest->dynarr_capacity - ptr_array_dest->dynarr_size;
+    while(available_space < ptr_array_src->dynarr_size) {
+        dynarr_expand(ptr_array_dest);
+        available_space =
+            ptr_array_dest->dynarr_capacity - ptr_array_dest->dynarr_size;
+    }
+
+    void* insert_point = ptr_array_dest->ptr_first_elem +
+                         ptr_array_dest->dynarr_size * ptr_array_src->elem_size;
+    void* copy_point = ptr_array_src->ptr_first_elem;
+    size_t copy_size = ptr_array_src->dynarr_size * ptr_array_src->elem_size;
+    memcpy(insert_point, copy_point, copy_size);
+
+    ptr_array_dest->dynarr_size += ptr_array_src->dynarr_size;
+
+    dynarr_free(ptr_array_src);
+
+    return (char*)insert_point;
+}
+
 // internals
 void dynarr_expand(dynarr_head* const ptr_head) {
     size_t new_capacity =
         (size_t)(ptr_head->dynarr_capacity * ptr_head->growth_fac);
     void* new_ptr =
         realloc(ptr_head->ptr_first_elem, new_capacity * ptr_head->elem_size);
-
     if(!new_ptr) {
         perror("realloc failed");
         exit(EXIT_FAILURE);
     }
+
     ptr_head->ptr_first_elem = new_ptr;
     ptr_head->dynarr_capacity = new_capacity;
 }
@@ -418,6 +443,49 @@ void tree_node_add_at_index(tree_op_res* op_res,
     op_res->node_ptr = new_node_ptr;
 }
 
+void tree_node_delete(tree_op_res* op_res,
+                      tree_head* const ptr_head,
+                      tree_node* ptr_node) {
+    tree_node* parent = ptr_node->parent;
+    dynarr_head* ptr_siblings = &parent->children;
+
+    if(parent == NULL && ptr_head->tree_root != ptr_node) {
+        op_res->code = SUBTREE_UNATTACHED;
+        op_res->node_ptr = NULL;
+        return;
+    } else if(ptr_head->tree_root == ptr_node) {
+        op_res->code = NODE_IS_ROOT;
+        op_res->node_ptr = NULL;
+        return;
+    }
+
+    // find index of node in parent children array
+    size_t node_index = 0;
+    tree_node** test_node_ptr = (tree_node**)ptr_siblings->ptr_first_elem;
+
+    while(*test_node_ptr != ptr_node) {
+        assert(node_index < ptr_siblings->dynarr_size &&
+               "Tree Corruption: Node not found in parent children array.");
+        ++node_index;
+        ++test_node_ptr;
+    }
+
+    // remove ptr from parent children array
+    dynarr_remove(ptr_siblings, node_index);
+    --ptr_head->tree_size;
+
+    // add children to siblings
+    if(ptr_node->children.dynarr_size != 0) {
+        dynarr_head* ptr_children = &ptr_node->children;
+        dynarr_concat(ptr_siblings, ptr_children);
+    }
+
+    tree_free_node(ptr_node);
+
+    op_res->code = OK;
+    op_res->node_ptr = parent;
+}
+
 void tree_detach_subtree(tree_op_res* op_res,
                          tree_head* const ptr_head,
                          tree_node* ptr_node) {
@@ -452,6 +520,7 @@ void tree_detach_subtree(tree_op_res* op_res,
     op_res->code = OK;
     op_res->node_ptr = ptr_node;
 }
+
 void tree_detach_root(tree_op_res* op_res, tree_head* const ptr_head) {
     op_res->node_ptr = ptr_head->tree_root;
     ptr_head->tree_root = NULL;
@@ -468,7 +537,7 @@ void tree_graft_subtree(tree_op_res* op_res,
         dynarr_head children_array = ptr_node->parent->children;
         tree_node** test_node_ptr = (tree_node**)children_array.ptr_first_elem;
         for(size_t i = 0; i < children_array.dynarr_size; ++i) {
-            if(*test_node_ptr == ptr_node) {
+            if(*test_node_ptr++ == ptr_node) {
                 op_res->code = SUBTREE_ATTACHED;
                 op_res->node_ptr = NULL;
                 return;
@@ -568,4 +637,9 @@ tree_node* tree_prepare_node(node_type dtype,
     dynarr_init(&new_node_ptr->children);
 
     return new_node_ptr;
+}
+
+void tree_free_node(tree_node* const ptr_node) {
+    dynarr_free(&ptr_node->children);
+    free(ptr_node);
 }

@@ -8,10 +8,15 @@
 #pragma warning(disable : 4200)
 #endif
 
-typedef enum { OK, SUBTREE_UNATTACHED, SUBTREE_ATTACHED } ERROR_CODES;
+typedef enum ERROR_CODES {
+    OK,
+    SUBTREE_UNATTACHED,
+    SUBTREE_ATTACHED,
+    NODE_IS_ROOT
+} ERROR_CODES;
 
 // DYNAMIC ARRAY
-typedef struct {
+typedef struct dynarr_head {
     size_t elem_size;
     size_t dynarr_size;
     size_t dynarr_capacity;
@@ -30,11 +35,15 @@ void dynarr_remove(dynarr_head* const ptr_head, size_t index);
 void dynarr_remove_n(dynarr_head* const ptr_head,
                      size_t index,
                      size_t n_elements);
+
+char* dynarr_concat(dynarr_head* const ptr_array_dest,
+                    dynarr_head* const ptr_array_src);
+
 // internals
 void dynarr_expand(dynarr_head* const ptr_head);
 
 // LINKED LIST
-typedef enum {
+typedef enum node_type {
     // Standard primitive types
     NODE_BOOL = 1,
     NODE_CHAR,
@@ -66,7 +75,7 @@ typedef enum {
 } node_type;
 
 typedef struct list_node list_node;
-typedef struct {
+typedef struct linked_list_head {
     size_t list_len;
     list_node* ptr_first_node;
     list_node* ptr_sentinel_node;
@@ -80,7 +89,7 @@ struct list_node {
     char data[];
 };
 
-typedef struct {
+typedef struct list_node_return {
     bool node_found;
     list_node* found_node_ptr;
 } list_node_return;
@@ -127,7 +136,7 @@ list_node* linlst_prepare_node(node_type dtype,
                                void const* data);
 
 // STACK
-typedef struct {
+typedef struct stack_head {
     dynarr_head impl_array;
 } stack_head;
 
@@ -139,7 +148,7 @@ void stack_free(stack_head* stack);
 
 // TREE
 typedef struct tree_node tree_node;
-typedef struct {
+typedef struct tree_head {
     size_t tree_size;
     tree_node* tree_root;
 } tree_head;
@@ -152,7 +161,7 @@ struct tree_node {
     char data[];
 };
 
-typedef struct {
+typedef struct tree_op_res {
     ERROR_CODES code;
     tree_node* node_ptr;
 } tree_op_res;
@@ -200,9 +209,10 @@ void tree_detach_graft_subtree(tree_op_res* op_res,
                                tree_node* ptr_node,
                                size_t graft_index);
 
-void tree_prune(tree_op_res* op_res,
-                tree_head* const ptr_head,
-                tree_node* ptr_node);
+// Free the subtree nodes in Post-Order traversal
+size_t tree_prune(tree_op_res* op_res,
+                  tree_head* const ptr_head,
+                  tree_node* ptr_node);
 void tree_free(tree_op_res* op_res, tree_head* const ptr_head);
 
 tree_node* tree_get_ith_node_ptr(tree_node* ptr_node, size_t i);
@@ -241,6 +251,4 @@ void tree_traversal_in_order(float in_order_partition,
 tree_node* tree_prepare_node(node_type dtype,
                              size_t data_size,
                              void const* data);
-void tree_free_node(tree_op_res* op_res,
-                    tree_head* const ptr_head,
-                    tree_node* const ptr_node);
+void tree_free_node(tree_node* const ptr_node);
