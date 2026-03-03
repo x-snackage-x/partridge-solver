@@ -56,7 +56,8 @@ typedef struct node_placement {
 
 bool is_solvable;
 bool is_solved;
-int loop_n;
+uint64_t loop_n;
+uint64_t tree_max;
 
 typedef enum my_node_types { NODE_PARTRIDGE = 1001 } my_node_types;
 
@@ -138,6 +139,7 @@ tree_node* record_placement(int selected_tile,
     tree_node_add(&tree_result, &placement_record, prev_placement,
                   NODE_PARTRIDGE, node_size, node_buffer);
     free(node_buffer);
+    ++tree_max;
 
     // visualize placement
     if(visualizer_set) {
@@ -152,10 +154,14 @@ tree_node* record_placement(int selected_tile,
 uint16_t record_removal(int selected_tile,
                         int x_pos,
                         int y_pos,
+                        tree_node* current,
                         tree_node* parent) {
     node_placement* parent_placement_data = (node_placement*)parent->data;
 
     parent_placement_data->valid_tiles &= ~(1 << (selected_tile - 1));
+
+    // delete node from tree
+    tree_node_delete(&tree_result, &placement_record, current);
 
     // visualize removal
     if(visualizer_set) {
@@ -177,10 +183,11 @@ bool solution_search() {
 
     point result_buffer = {0};
     loop_n = 0;
+    tree_max = 0;
     while(!is_solved) {
         if(++loop_n % 100000 == 0 && !visualizer_set) {
-            printf("Current iter.: %'d - Tree Size: %'zu Nodes", loop_n,
-                   placement_record.tree_size);
+            printf("Current iter.: %'" PRIu64 " - Tree Size: %'zu Nodes",
+                   loop_n, placement_record.tree_size);
             fflush(stdout);
             printf("\r");
         }
@@ -232,7 +239,7 @@ bool solution_search() {
 
             valid_tiles_buffer = record_removal(
                 cur_placement_data.tile_type, cur_placement_data.x_pos,
-                cur_placement_data.y_pos, parent);
+                cur_placement_data.y_pos, last_placement, parent);
 
             if(print_full_log)
                 fprintf(log_fptr, " Remove tile: %d, Pos. (%2d,%2d)\n",
@@ -270,7 +277,7 @@ bool solution_search() {
 
             valid_tiles_buffer = record_removal(
                 cur_placement_data.tile_type, cur_placement_data.x_pos,
-                cur_placement_data.y_pos, parent);
+                cur_placement_data.y_pos, last_placement, parent);
 
             if(print_full_log)
                 fprintf(log_fptr, " Remove tile: %d, Pos. (%2d,%2d)\n",
@@ -363,23 +370,25 @@ int main(int argc, char* argv[]) {
     fprintf(log_fptr, "\n");
     print_free_pieces(my_puzzle, log_fptr);
 
-    printf("\nTree Size: %'zu Nodes\n", placement_record.tree_size);
-    fprintf(tree_fptr, "Tree Size: %'zu Nodes\n", placement_record.tree_size);
-    fprintf(log_fptr, "\nTree Size: %'zu Nodes\n", placement_record.tree_size);
+    printf("\nMax. Tree Size: %'" PRIu64 " - Cur. Tree Size: %'zu Nodes\n",
+           tree_max, placement_record.tree_size);
+    fprintf(tree_fptr,
+            "Max. Tree Size: %'" PRIu64 " - Cur. Tree Size: %'zu Nodes\n",
+            tree_max, placement_record.tree_size);
+    fprintf(log_fptr,
+            "\nMax. Tree Size: %'" PRIu64 " - Cur. Tree Size: %'zu Nodes\n",
+            tree_max, placement_record.tree_size);
 
-    printf("n-Iterations: %'d\n", loop_n);
-    fprintf(log_fptr, "n-Iterations: %'d\n", loop_n);
+    printf("n-Iterations: %'" PRIu64 "\n", loop_n);
+    fprintf(log_fptr, "n-Iterations: %'" PRIu64 "\n", loop_n);
     printf("Solve Time: %f seconds\n", solve_time);
     fprintf(log_fptr, "Solve Time: %f seconds\n", solve_time);
 
     bool* flags = malloc(sizeof(bool) * placement_record.tree_size);
     memset(flags, true, placement_record.tree_size);
 
-    if(placement_record.tree_size <= 100000) {
-        printTree(placement_record.tree_root, 0, false, flags, tree_fptr);
-    } else if(is_solved) {
-        printWinningBranch(tree_fptr);
-    }
+    printWinningBranch(tree_fptr);
+    printTree(placement_record.tree_root, 0, false, flags, tree_fptr);
 
     // Close the files
     fclose(log_fptr);
@@ -685,9 +694,19 @@ void printWinningBranch(FILE* file_ptr) {
         for(int i = 0; i < extra_spaces; i++)
             fprintf(file_ptr, "─");
         fprintf(file_ptr, "┐\n");
-        fprintf(file_ptr, "│ Tile: %2d %*s-%*s Pos.:(%2d, %2d) │\n",
+        fprintf(file_ptr, "│ Tile: %2d %*s-%*s Pos.:(",
                 placement_data.tile_type, extra_spaces_l, "", extra_spaces_r,
-                "", placement_data.x_pos, placement_data.y_pos);
+                "");
+        if(placement_data.x_pos == 255) {
+            fprintf(file_ptr, " -,");
+        } else {
+            fprintf(file_ptr, "%2d,", placement_data.x_pos);
+        }
+        if(placement_data.y_pos == 255) {
+            fprintf(file_ptr, " - ) │\n");
+        } else {
+            fprintf(file_ptr, " %2d) │\n", placement_data.x_pos);
+        }
         fprintf(file_ptr, "│ Valid Tiles:   ");
         for(int i = 0; i < my_puzzle->size; ++i) {
             fprintf(file_ptr, "%d", (tiles_mask >> i) & 1);
