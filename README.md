@@ -59,7 +59,7 @@ Steps:
     1. ~~Use function pointer approach to pass a callback function that visualizes the board~~
     1. Improve Memory Consumption:
         1. ~~Transition from Array of bools for `valid_tiles` to bit representation~~ -> Not sufficient, in testing still a limit of ~60mil nodes
-        1. Implement tree pruning and memory free algorithm for elhaylib and use it to prune explored branches and free memory to avoid OOM errors
+        1. ~~Implement tree pruning and memory free algorithm for elhaylib and use it to prune explored branches and free memory to avoid OOM errors~~
     1. Implement more complex `is_solvable` algos?
     1. ~~Implement a print function to save a visual representation of tree to a file~~
     1. ~~If Tree to large print solution branch instead~~
@@ -83,4 +83,4 @@ Portability
 - Port to WASM using `Emscripten`?
 
 Puzzle
-- Make it playable using console commands
+- ~~Make it playable using console commands~~

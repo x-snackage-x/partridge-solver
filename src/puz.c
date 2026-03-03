@@ -1,7 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <puz.h>
+
+typedef struct puz_entry {
+    int type;
+    int x_pos;
+    int y_pos;
+} puz_entry;
+
+dynarr_head* puz_journal;
+
+int find_journal_entry(puz_entry* needle) {
+    puz_entry* ptr_journal = (puz_entry*)puz_journal->ptr_first_elem;
+    size_t n_entries = puz_journal->dynarr_size;
+
+    int found_index = -1;
+    for(int i = 0; i < n_entries; ++i) {
+        if(needle->type == ptr_journal->type &&
+           needle->x_pos == ptr_journal->x_pos &&
+           needle->y_pos == ptr_journal->y_pos) {
+            found_index = i;
+            break;
+        } else {
+            ++ptr_journal;
+        }
+    }
+
+    return found_index;
+}
 
 void init_puzzle(puzzle_def* puzzle, bool override) {
     if(!override && puzzle->size > 1 && puzzle->size < 8) {
@@ -31,9 +59,18 @@ void init_puzzle(puzzle_def* puzzle, bool override) {
     for(int i = 1; i < grid_size; i++) {
         puzzle->puzzle_grid[i] = puzzle->puzzle_grid[0] + i * grid_size;
     }
+
+    // init journal
+    puz_journal = calloc(1, sizeof(dynarr_head));
+    puz_journal->elem_size = sizeof(puz_entry);
+    dynarr_init(puz_journal);
 }
 
 int get_n_available_pieces(puzzle_def* puzzle_def, int block_id) {
+    if(block_id > puzzle_def->size || block_id <= 0) {
+        return 0;
+    }
+
     block_def* blocks = (block_def*)puzzle_def->blocks->ptr_first_elem;
     return blocks[block_id].free_pieces;
 }
@@ -93,6 +130,14 @@ RETURN_CODES place_block(puzzle_def* puzzle,
     }
     block_def* blocks = (block_def*)puzzle->blocks->ptr_first_elem;
     --blocks[block_id].free_pieces;
+
+    puz_entry entry_buffer = {
+        .type = block_id,
+        .x_pos = x_pos,
+        .y_pos = y_pos,
+    };
+    dynarr_append(puz_journal, &entry_buffer);
+
     return SUCCESS;
 }
 
@@ -111,6 +156,16 @@ RETURN_CODES remove_block(puzzle_def* puzzle,
             }
         }
     }
+    puz_entry needle = {
+        .type = block_id,
+        .x_pos = x_pos,
+        .y_pos = y_pos,
+    };
+    int index = find_journal_entry(&needle);
+    if(index < 0) {
+        return CORRESPONDING_MOVE_NOT_FOUND;
+    }
+    dynarr_remove(puz_journal, (size_t)index);
 
     for(int i = 0; i < block_id; ++i) {
         for(int j = 0; j < block_id; ++j) {
@@ -119,7 +174,88 @@ RETURN_CODES remove_block(puzzle_def* puzzle,
     }
     block_def* blocks = (block_def*)puzzle->blocks->ptr_first_elem;
     ++blocks[block_id].free_pieces;
+
     return SUCCESS;
+}
+
+void print_help() {
+    printf("Place Block Format: ${Tile Type} ${X Pos} ${Y Pos} eg. 8 0 0\n");
+    printf(
+        "Remove Block Format: r ${Tile Type} ${X Pos} ${Y Pos} eg. r 8 0 0\n");
+    printf("Quit input: q\n");
+    printf("Print Grid: g\n");
+    printf("Print available Tiles: t\n");
+    printf("Print this help text: h\n");
+}
+
+void play_puzzle(puzzle_def* puzzle) {
+    char buff[20];
+    print_help();
+    while(true) {
+        char* fgbuf = fgets(buff, 10, stdin);
+        if(fgbuf == NULL) {
+            printf("Failure of fgets. Repeat input.\n");
+        } else if(buff[0] == 'q') {
+            break;
+        } else if(buff[0] == 'g') {
+            print_grid(puzzle, stdout);
+            continue;
+        } else if(buff[0] == 't') {
+            print_free_pieces(puzzle, stdout);
+            continue;
+        } else if(buff[0] == 'h') {
+            print_help();
+            continue;
+        } else {
+            bool is_remove = false;
+            char* token = strtok(buff, " ");
+            if(token == NULL)
+                continue;
+            if(token[0] == 'r') {
+                is_remove = true;
+                token = strtok(NULL, " ");
+                if(token == NULL)
+                    continue;
+            }
+            int tile_type = (int)strtol(token, NULL, 10);
+            token = strtok(NULL, " ");
+            if(token == NULL)
+                continue;
+            int x_pos = (int)strtol(token, NULL, 10);
+            token = strtok(NULL, " ");
+            if(token == NULL)
+                continue;
+            int y_pos = (int)strtol(token, NULL, 10);
+
+            RETURN_CODES answer;
+            if(is_remove) {
+                answer = remove_block(puzzle, tile_type, x_pos, y_pos);
+            } else {
+                answer = place_block(puzzle, tile_type, x_pos, y_pos);
+            }
+
+            switch(answer) {
+                case SUCCESS:
+                default:
+                    break;
+                case NO_FREE_PIECES:
+                    printf("No free pieces of given type.\n");
+                    break;
+                case CONFLICT_ON_GRID:
+                    printf("Conflict when placing tile.\n");
+                    break;
+                case CONFLICTING_BLOCK_TYPES:
+                case NO_BLOCK_AT_POSITION:
+                    printf("No or conflicting tile found at given position.\n");
+                    break;
+                case CORRESPONDING_MOVE_NOT_FOUND:
+                    printf(
+                        "No corresponding put move found for remove. Make sure "
+                        "to input top-left position of block.\n");
+                    break;
+            }
+        }
+    }
 }
 
 void print_grid(puzzle_def* puzzle, FILE* file_ptr) {
@@ -148,47 +284,16 @@ void print_free_pieces(puzzle_def* puzzle, FILE* file_ptr) {
 }
 
 #ifdef BUILD_PUZ
-int main() {
+int main(int argc, char* argv[]) {
     puzzle_def my_puzzle_def = {0};
     my_puzzle_def.size = 8;
-    init_puzzle(&my_puzzle_def);
 
-    printf("Print Grid:\n");
-    print_grid(&my_puzzle_def, stdout);
+    if(argc > 1) {
+        my_puzzle_def.size = (int)strtol(argv[1], NULL, 10);
+        printf("Puzzle definition: %d\n", my_puzzle_def.size);
+    }
 
-    printf("---------------------------\n");
-
-    printf("Printing Blocks:\n");
-    printf("Block Dyn-array Cap: %ld - Block Dyn-array Size: %ld\n",
-           my_puzzle_def.blocks->dynarr_capacity,
-           my_puzzle_def.blocks->dynarr_size);
-    print_free_pieces(&my_puzzle_def, stdout);
-
-    printf("---------------------------\n");
-
-    printf("Testing Conflict Function:\n");
-    printf("No placements:\n");
-    printf("Testing 4 @ (50,5): %d\n", place_block(&my_puzzle_def, 4, 50, 5));
-    printf("Testing 4 @ (34,5): %d\n", place_block(&my_puzzle_def, 4, 34, 5));
-    printf("Placing 4 @ (32,5): %d\n", place_block(&my_puzzle_def, 4, 32, 5));
-    printf("Placing 7 @ (3,5): %d\n", place_block(&my_puzzle_def, 7, 3, 5));
-    printf("Testing 4 @ (2,3): %d\n", place_block(&my_puzzle_def, 4, 2, 3));
-    printf("Testing 4 @ (5,6): %d\n", place_block(&my_puzzle_def, 4, 5, 6));
-    printf("Placing 1 @ (0,0): %d\n", place_block(&my_puzzle_def, 1, 0, 0));
-    printf("Placing 1 @ (0,0): %d\n", place_block(&my_puzzle_def, 1, 0, 0));
-
-    print_grid(&my_puzzle_def, stdout);
-
-    printf("Removing 1 @ (0,0): %d\n", remove_block(&my_puzzle_def, 1, 0, 0));
-    print_grid(&my_puzzle_def, stdout);
-
-    printf("Removing 1 @ (0,0): %d\n", remove_block(&my_puzzle_def, 1, 0, 0));
-    printf("Removing 5 @ (3,5): %d\n", remove_block(&my_puzzle_def, 5, 3, 5));
-    printf("Removing 4 @ (32,5): %d\n", remove_block(&my_puzzle_def, 4, 32, 5));
-    print_grid(&my_puzzle_def, stdout);
-
-    printf("Is puzzle solved: %d\n", is_puzzle_solved(&my_puzzle_def));
-
-    print_free_pieces(&my_puzzle_def, stdout);
+    init_puzzle(&my_puzzle_def, true);
+    play_puzzle(&my_puzzle_def);
 }
 #endif

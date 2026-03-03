@@ -20,7 +20,8 @@ typedef enum RETURN_CODES {
     NO_FREE_PIECES,
     CONFLICT_ON_GRID,
     NO_BLOCK_AT_POSITION,
-    CONFLICTING_BLOCK_TYPES
+    CONFLICTING_BLOCK_TYPES,
+    CORRESPONDING_MOVE_NOT_FOUND
 } RETURN_CODES;
 
 // Only size is expected to be set
@@ -44,5 +45,6 @@ bool placement_resolvable(puzzle_def* puzzle,
                           int y_pos);
 bool is_puzzle_solved(puzzle_def* puzzle);
 
+void play_puzzle(puzzle_def* puzzle);
 void print_grid(puzzle_def* puzzle, FILE* file_ptr);
 void print_free_pieces(puzzle_def* puzzle, FILE* file_ptr);

@@ -83,7 +83,7 @@ sol_prod: $(SOL_OBJS)
 	$(CC) -o sol_prod.out $^ $(LIBS)
 
 # Prod MinGW Windows build:
-sol_prod:CFLAGS = -Wall $(PROD_FLAGS)
+sol_win:CFLAGS = -Wall $(PROD_FLAGS)
 SOL_WIN_ODIR=obj/sol_mingw
 SOL_OBJS= $(SOL_WIN_ODIR)/elhaylib.o \
 		    $(SOL_WIN_ODIR)/vis.o \
