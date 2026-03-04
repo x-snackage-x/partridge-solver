@@ -71,8 +71,8 @@ bool is_solvable_gap_cond(puzzle_def* puzzle);
 uint16_t set_exhausted_tiles(uint16_t valid_tiles);
 int n_ok_tile_types(uint16_t valid_tiles);
 
-puzzle_def* setup_puzzle(int puzzle_type);
-void handle_input(int argc, char** argv, int* puzzle_type);
+puzzle_def* setup_puzzle(int puzzle_type, FILE** in_ptr_ptr);
+void handle_input(int argc, char** argv, int* puzzle_type, FILE** in_fptr);
 int is_integer(const char* arg);
 void printWinningBranch(FILE* file_ptr);
 void printNode(tree_node* ptr_node, FILE* file_ptr);
@@ -300,7 +300,8 @@ int main(int argc, char* argv[]) {
     override = false;
     int puzzle_type = 8;
 
-    handle_input(argc, argv, &puzzle_type);
+    FILE* in_ptr = NULL;
+    handle_input(argc, argv, &puzzle_type, &in_ptr);
 
     // Make logs dir
     struct stat st = {0};
@@ -316,8 +317,17 @@ int main(int argc, char* argv[]) {
     log_fptr = fopen("logs/log.txt", "w");
     tree_fptr = fopen("logs/tree.txt", "w");
 
-    puzzle_def* start_puzzle = setup_puzzle(puzzle_type);
+    puzzle_def* start_puzzle = setup_puzzle(puzzle_type, &in_ptr);
     setup(start_puzzle);
+
+    if(in_ptr != NULL) {
+        printf("Starting Configuration defined:\n");
+        fprintf(log_fptr, "Starting Configuration defined:\n");
+        print_grid(my_puzzle, NULL);
+        print_grid(my_puzzle, log_fptr);
+        printf("\n");
+        fprintf(log_fptr, "\n");
+    }
 
     if(visualizer_set) {
         set_visualizer(init_terminal, prep_vis_grid, render_vis_grid,
@@ -363,10 +373,12 @@ int main(int argc, char* argv[]) {
            is_solvable ? "true" : "false", is_solved ? "true" : "false");
     printf("\33[2K\r\n");
 
-    print_grid(my_puzzle, NULL);
-    printf("\n");
+    if(is_solved) {
+        print_grid(my_puzzle, NULL);
+        print_grid(my_puzzle, log_fptr);
+        printf("\n");
+    }
     print_free_pieces(my_puzzle, NULL);
-    print_grid(my_puzzle, log_fptr);
     fprintf(log_fptr, "\n");
     print_free_pieces(my_puzzle, log_fptr);
 
@@ -589,15 +601,50 @@ int n_ok_tile_types(uint16_t valid_tiles) {
     return available_tiles;
 }
 
-puzzle_def* setup_puzzle(int puzzle_type) {
+puzzle_def* setup_puzzle(int puzzle_type, FILE** in_ptr_ptr) {
     puzzle_def* my_puzzle = calloc(1, sizeof(puzzle_def));
     my_puzzle->size = puzzle_type;
     init_puzzle(my_puzzle, override);
 
+    if(*in_ptr_ptr == NULL) {
+        return my_puzzle;
+    }
+
+    FILE* in_file = *in_ptr_ptr;
+    char* line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    RETURN_CODES answer;
+    // fgets(&line, 10, in_file);
+    while((read = getline(&line, &len, in_file)) != -1) {
+        char* token = strtok(line, " ");
+        int tile_type = (int)strtol(token, NULL, 10);
+        token = strtok(NULL, " ");
+        if(token == NULL)
+            exit(EXIT_FAILURE);
+        int x_pos = (int)strtol(token, NULL, 10);
+        token = strtok(NULL, " ");
+        if(token == NULL)
+            exit(EXIT_FAILURE);
+        int y_pos = (int)strtol(token, NULL, 10);
+
+        answer = place_block(my_puzzle, tile_type, x_pos, y_pos);
+        if(answer != SUCCESS) {
+            printf(
+                "Issue encountered placing tiles. Check tile placements in "
+                "file for consistancy.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if(line)
+        free(line);
+    fclose(in_file);
+
     return my_puzzle;
 }
 
-void handle_input(int argc, char** argv, int* puzzle_type) {
+void handle_input(int argc, char** argv, int* puzzle_type, FILE** in_ptr_ptr) {
     bool integer_inputted = false;
     for(int i = 1; i < argc; ++i) {
         if(strcmp(argv[i], "vis") == 0) {
@@ -606,6 +653,36 @@ void handle_input(int argc, char** argv, int* puzzle_type) {
             print_full_log = true;
         } else if(strcmp(argv[i], "override") == 0) {
             override = true;
+        } else if(strcmp(argv[i], "readin") == 0) {
+            char* line = NULL;
+            size_t len = 0;
+            ssize_t read;
+
+            *in_ptr_ptr = fopen("start.in", "r");
+            if(*in_ptr_ptr == NULL)
+                exit(EXIT_FAILURE);
+            // fgets(&line, 10, in_file);
+            read = getline(&line, &len, *in_ptr_ptr);
+            if(read == -1) {
+                printf("Input configuration file is empty.\n");
+                exit(EXIT_FAILURE);
+            } else if(read > 3) {
+                printf("First record isn't in the expected format.\n");
+                exit(EXIT_FAILURE);
+            }
+            *puzzle_type = (int)strtol(line, NULL, 10);
+            if(*puzzle_type > 16) {
+                printf(
+                    "Puzzle definitions greater than 16 aren't "
+                    "permitted/useful.\n");
+                exit(EXIT_FAILURE);
+            }
+            integer_inputted = true;
+
+            if(line)
+                free(line);
+
+            continue;
         } else if(strcmp(argv[i], "novis") == 0 ||
                   strcmp(argv[i], "nofulllog") == 0 ||
                   strcmp(argv[i], "nooverride") == 0) {
@@ -615,7 +692,10 @@ void handle_input(int argc, char** argv, int* puzzle_type) {
                 "Usage: ./sol.out {number} {vis|novis} {fulllog|nofulllog} "
                 "{override|nooverride}\n"
                 "Command Line arguments are optional\n"
-                "Defaults: 8 novis nofulllog.\n");
+                "Defaults: 8 novis nofulllog.\n\n"
+                "Usage with input start config in \"start.in\" file: ./sol.out "
+                "{readin} {vis|novis} {fulllog|nofulllog} "
+                "{override|nooverride}\n");
             return exit(EXIT_SUCCESS);
         } else if(is_integer(argv[i]) != 0 && !integer_inputted) {
             int num = (int)strtol(argv[1], NULL, 10);

@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-#define TESTING
+#undef TESTING
 
 typedef enum COLOR {
     BLACK = 0,

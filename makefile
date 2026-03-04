@@ -100,5 +100,8 @@ sol_win: $(SOL_OBJS)
 	$(CC_WIN) -o sol.exe $^
 
 # --------------------
+all: sol sol_prod sol_win
+
+# --------------------
 clean:
 	rm -rf obj *.out *.exe

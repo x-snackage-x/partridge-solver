@@ -6,12 +6,27 @@ https://github.com/user-attachments/assets/3a07d338-07fe-4609-9ce8-4c470945a787
 
 ## Usage
 
-The solver is implemented as a console program that can be called with three optional command line arguments. Passing an integer will be interpreted as the desired puzzle definition type i.e. the size of the largest tile. The flags `{vis|novis} {fulllog|nofulllog} {override|nooverride}` can activate the visualizer, the full log and overriding the protection for unsolvable puzzles.  
+The solver is implemented as a console program that can be called with four optional command line arguments. Passing an integer will be interpreted as the desired puzzle definition type i.e. the size of the largest tile. The flags `{vis|novis} {fulllog|nofulllog} {override|nooverride}` can activate the visualizer, the full log and overriding the protection for unsolvable puzzles.  
 The defaults are: `8 novis nofulllog nooverride`  
 
 ```shell
 wd$: ./sol.out {integer} {vis|novis} {fulllog|nofulllog} {override|nooverride}
 ```
+
+To pass a starting configuration by way of an input file save the definition under `start.in` placed in the execution directory and pass the command line argument `readin`. The puzzle defintion input argument is omitted when using an input file. The file needs to conform to the following structure:
+
+```C
+8           // the puzzle definition type
+7 0 0       // Tile placements with $Tile_type $X_position $Y_position
+...         // etc.
+``` 
+
+```shell
+wd$: ./sol.out {readin} {vis|novis} {fulllog|nofulllog} {override|nooverride}
+```
+
+An example `start.in` is proveded.
+
 Currently, the terminal visualizer will only work for grid sizes and terminal window sizes that don't result in scrolling behavior.
 
 A `makefile` is provided for building the project as either a Linux or Windows application. 
@@ -63,12 +78,12 @@ Steps:
     1. Implement more complex `is_solvable` algos?
     1. ~~Implement a print function to save a visual representation of tree to a file~~
     1. ~~If Tree to large print solution branch instead~~
-    1. Expand to be able to pass a starting configutation
+    1. ~~Expand to be able to pass a starting configutation~~
     1. Add command line arguments for controlling visualizer and printing
         - ~~puzzle size~~
         - ~~vis and novis~~
         - ~~fulllog and nofulllog~~
-        - Set iteration limit or tree size limit?
+        - ~~Set iteration limit or tree size limit?~~ Not necessary
     1. Improve code quality and cleanup
     1. ~~Add five more colors~~
     1. Fix VSC setup defaults for run and debug (seems like the run config/task/launch is missing maybe that's what's causing issues)
