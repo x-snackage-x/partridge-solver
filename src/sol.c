@@ -610,13 +610,10 @@ puzzle_def* setup_puzzle(int puzzle_type, FILE** in_ptr_ptr) {
         return my_puzzle;
     }
 
+    char line[20];
     FILE* in_file = *in_ptr_ptr;
-    char* line = NULL;
-    size_t len = 0;
-    ssize_t read;
     RETURN_CODES answer;
-    // fgets(&line, 10, in_file);
-    while((read = getline(&line, &len, in_file)) != -1) {
+    while(fgets(line, 20, in_file)) {
         char* token = strtok(line, " ");
         int tile_type = (int)strtol(token, NULL, 10);
         token = strtok(NULL, " ");
@@ -637,8 +634,6 @@ puzzle_def* setup_puzzle(int puzzle_type, FILE** in_ptr_ptr) {
         }
     }
 
-    if(line)
-        free(line);
     fclose(in_file);
 
     return my_puzzle;
@@ -654,19 +649,16 @@ void handle_input(int argc, char** argv, int* puzzle_type, FILE** in_ptr_ptr) {
         } else if(strcmp(argv[i], "override") == 0) {
             override = true;
         } else if(strcmp(argv[i], "readin") == 0) {
-            char* line = NULL;
-            size_t len = 0;
-            ssize_t read;
-
+            char line[20];
             *in_ptr_ptr = fopen("start.in", "r");
             if(*in_ptr_ptr == NULL)
                 exit(EXIT_FAILURE);
-            // fgets(&line, 10, in_file);
-            read = getline(&line, &len, *in_ptr_ptr);
-            if(read == -1) {
+
+            char* line_ptr = fgets(line, 20, *in_ptr_ptr);
+            if(line_ptr == NULL) {
                 printf("Input configuration file is empty.\n");
                 exit(EXIT_FAILURE);
-            } else if(read > 3) {
+            } else if(strlen(line) > 3) {
                 printf("First record isn't in the expected format.\n");
                 exit(EXIT_FAILURE);
             }
@@ -678,9 +670,6 @@ void handle_input(int argc, char** argv, int* puzzle_type, FILE** in_ptr_ptr) {
                 exit(EXIT_FAILURE);
             }
             integer_inputted = true;
-
-            if(line)
-                free(line);
 
             continue;
         } else if(strcmp(argv[i], "novis") == 0 ||

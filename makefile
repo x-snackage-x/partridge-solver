@@ -13,7 +13,7 @@ _DEPS=elhaylib.h vis.h puz.h sol.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS))
 
 # Default
-all: vis puz sol
+all: sol sol_prod sol_win
 
 # --------------------
 # VIS
@@ -99,8 +99,6 @@ $(SOL_WIN_ODIR):
 sol_win: $(SOL_OBJS)
 	$(CC_WIN) -o sol.exe $^
 
-# --------------------
-all: sol sol_prod sol_win
 
 # --------------------
 clean:

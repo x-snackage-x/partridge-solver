@@ -101,7 +101,7 @@ bool init_terminal() {
     if(!is_successful) {
         printf("Couldn't enable virtual terminal processing.\n");
         printf("Disabling Visualizer.\n");
-        return;
+        return false;
     }
 
     SetConsoleOutputCP(CP_UTF8);
