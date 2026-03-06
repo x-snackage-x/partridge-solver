@@ -15,6 +15,12 @@ typedef struct puzzle_def {
     dynarr_head* blocks;
 } puzzle_def;
 
+typedef struct puz_entry {
+    int type;
+    int x_pos;
+    int y_pos;
+} puz_entry;
+
 typedef enum RETURN_CODES {
     SUCCESS,
     NO_FREE_PIECES,
@@ -44,6 +50,8 @@ bool placement_resolvable(puzzle_def* puzzle,
                           int x_pos,
                           int y_pos);
 bool is_puzzle_solved(puzzle_def* puzzle);
+
+dynarr_head* get_puzzle_journal();
 
 void play_puzzle(puzzle_def* puzzle);
 void print_grid(puzzle_def* puzzle, FILE* file_ptr);

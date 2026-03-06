@@ -4,13 +4,11 @@
 
 #include <puz.h>
 
-typedef struct puz_entry {
-    int type;
-    int x_pos;
-    int y_pos;
-} puz_entry;
-
 dynarr_head* puz_journal;
+
+dynarr_head* get_puzzle_journal() {
+    return puz_journal;
+}
 
 int find_journal_entry(puz_entry* needle) {
     puz_entry* ptr_journal = (puz_entry*)puz_journal->ptr_first_elem;

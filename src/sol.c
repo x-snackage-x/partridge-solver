@@ -28,13 +28,12 @@ bool print_full_log;
 bool visualizer_set;
 bool override;
 VIS_I_PTR grid_init_func;
-VIS_F_PTR grid_prep_func;
+VIS_SET_C_PTR grid_prep_func;
 VIS_F_PTR grid_render_func;
 VIS_F_PTR grid_reset_func;
 VIS_F_PTR grid_record_func;
 VIS_SET_F_PTR block_set_func;
 VIS_SET_F_PTR block_remove_func;
-VIS_SET_C_PTR block_set_color_func;
 
 puzzle_def* my_puzzle;
 
@@ -109,13 +108,12 @@ void setup(puzzle_def* start_puzzle) {
 }
 
 void set_visualizer(VIS_I_PTR grid_init_func_in,
-                    VIS_F_PTR grid_prep_func_in,
+                    VIS_SET_C_PTR grid_prep_func_in,
                     VIS_F_PTR grid_render_func_in,
                     VIS_F_PTR grid_reset_func_in,
                     VIS_F_PTR grid_record_func_in,
                     VIS_SET_F_PTR block_set_func_in,
-                    VIS_SET_F_PTR block_remove_func_in,
-                    VIS_SET_C_PTR block_set_color_func_in) {
+                    VIS_SET_F_PTR block_remove_func_in) {
     grid_init_func = grid_init_func_in;
     grid_prep_func = grid_prep_func_in;
     grid_render_func = grid_render_func_in;
@@ -123,7 +121,6 @@ void set_visualizer(VIS_I_PTR grid_init_func_in,
     grid_record_func = grid_record_func_in;
     block_set_func = block_set_func_in;
     block_remove_func = block_remove_func_in;
-    block_set_color_func = block_set_color_func_in;
 }
 
 tree_node* record_placement(int selected_tile,
@@ -332,16 +329,11 @@ int main(int argc, char* argv[]) {
     if(visualizer_set) {
         set_visualizer(init_terminal, prep_vis_grid, render_vis_grid,
                        reset_vis_grid, record_vis_grid, set_vis_block,
-                       remove_vis_block, def_block_colors);
+                       remove_vis_block);
         visualizer_set = grid_init_func();
     }
     if(visualizer_set) {
-        COLOR blocks[] = {WHITE,     ROYAL_BLUE, ORANGE, MAGENTA,
-                          CYAN,      RED,        GREEN,  GRAY,
-                          DARKGRAY,  YELLOW,     BLUE,   HINGREEN,
-                          HINYELLOW, HINBLUE,    PINK,   LIGRAY};
-        block_set_color_func((int*)blocks, my_puzzle->size);
-        grid_prep_func(my_puzzle->grid_dimension);
+        grid_prep_func(my_puzzle->grid_dimension, my_puzzle->size);
 
         // record root tile
         grid_render_func(my_puzzle->grid_dimension);
@@ -629,7 +621,7 @@ puzzle_def* setup_puzzle(int puzzle_type, FILE** in_ptr_ptr) {
         if(answer != SUCCESS) {
             printf(
                 "Issue encountered placing tiles. Check tile placements in "
-                "file for consistancy.\n");
+                "file for consistency.\n");
             exit(EXIT_FAILURE);
         }
     }

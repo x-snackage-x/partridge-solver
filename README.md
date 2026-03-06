@@ -1,6 +1,6 @@
 # Partridge Puzzle Solver
 
-A Partridge Puzzle solver inspired by the Stand-up Maths video ["The impossible puzzle with over a million solutions!"](https://www.youtube.com/watch?v=eqyuQZHfNPQ).
+A Partridge Puzzle solver inspired by the Stand-up Maths video ["The impossible puzzle with over a million solutions!"](https://www.youtube.com/watch?v=eqyuQZHfNPQ). In addition to being an interesting problem to solve, this project was also an opportunity to use by personal generic data structures library [elhaylib](https://github.com/x-snackage-x/elhaylib) and vet it against a real use case. 
 
 https://github.com/user-attachments/assets/3a07d338-07fe-4609-9ce8-4c470945a787
 
@@ -13,7 +13,7 @@ The defaults are: `8 novis nofulllog nooverride`
 wd$: ./sol.out {integer} {vis|novis} {fulllog|nofulllog} {override|nooverride}
 ```
 
-To pass a starting configuration by way of an input file save the definition under `start.in` placed in the execution directory and pass the command line argument `readin`. The puzzle defintion input argument is omitted when using an input file. The file needs to conform to the following structure:
+To pass a starting configuration by way of an input file save the definition under `start.in` placed in the execution directory and pass the command line argument `readin`. The puzzle definition input argument is omitted when using an input file. The file needs to conform to the following structure:
 
 ```C
 8           // the puzzle definition type
@@ -25,7 +25,7 @@ To pass a starting configuration by way of an input file save the definition und
 wd$: ./sol.out {readin} {vis|novis} {fulllog|nofulllog} {override|nooverride}
 ```
 
-An example `start.in` is proveded.
+An example `start.in` is provided.
 
 Currently, the terminal visualizer will only work for grid sizes and terminal window sizes that don't result in scrolling behavior.
 

@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-#undef TESTING
+#define TESTING
 
 typedef enum COLOR {
     BLACK = 0,
@@ -25,7 +25,7 @@ typedef enum COLOR {
 } COLOR;
 
 bool init_terminal();
-void prep_vis_grid(int size);
+void prep_vis_grid(int size, int puzzle_type);
 void render_vis_grid(int size);
 void reset_vis_grid(int size);
 void record_vis_grid(int size);

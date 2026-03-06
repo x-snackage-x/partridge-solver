@@ -110,7 +110,13 @@ bool init_terminal() {
     return is_successful;
 }
 
-void prep_vis_grid(int size) {
+void prep_vis_grid(int size, int puzzle_type) {
+    // Default colors
+    COLOR blocks[] = {WHITE,     ROYAL_BLUE, ORANGE,   MAGENTA, CYAN, RED,
+                      GREEN,     GRAY,       DARKGRAY, YELLOW,  BLUE, HINGREEN,
+                      HINYELLOW, HINBLUE,    PINK,     LIGRAY};
+    def_block_colors((int*)blocks, puzzle_type);
+
     for(int line = 0; line < size; ++line) {
 #ifdef TESTING
         for(int i = 0; i < STEP_SIZE * size; i++) {

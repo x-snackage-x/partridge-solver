@@ -13,7 +13,7 @@ _DEPS=elhaylib.h vis.h puz.h sol.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS))
 
 # Default
-all: sol sol_prod sol_win
+all: sol sol_opt sol_win
 
 # --------------------
 # VIS
@@ -66,21 +66,21 @@ sol: $(SOL_OBJS)
 	$(CC) -o sol.out $^ $(LIBS)
 
 # Prod Linux build 
-sol_prod:CFLAGS = -Wall $(PROD_FLAGS)
-SOL_PROD_ODIR=obj/sol_prod
-SOL_OBJS= $(SOL_PROD_ODIR)/elhaylib.o \
-		    $(SOL_PROD_ODIR)/vis.o \
-		    $(SOL_PROD_ODIR)/puz.o \
-		    $(SOL_PROD_ODIR)/sol.o
+sol_opt:CFLAGS = -Wall $(PROD_FLAGS)
+SOL_OPT_ODIR=obj/sol_opt
+SOL_OBJS= $(SOL_OPT_ODIR)/elhaylib.o \
+		    $(SOL_OPT_ODIR)/vis.o \
+		    $(SOL_OPT_ODIR)/puz.o \
+		    $(SOL_OPT_ODIR)/sol.o
 
-$(SOL_PROD_ODIR)/%.o: $(SDIR)/%.c $(DEPS) | $(SOL_PROD_ODIR)
+$(SOL_OPT_ODIR)/%.o: $(SDIR)/%.c $(DEPS) | $(SOL_OPT_ODIR)
 	$(CC) -c $(INC) $(CFLAGS) $< -o $@
 
-$(SOL_PROD_ODIR):
+$(SOL_OPT_ODIR):
 	mkdir -p $@
 
-sol_prod: $(SOL_OBJS)
-	$(CC) -o sol_prod.out $^ $(LIBS)
+sol_opt: $(SOL_OBJS)
+	$(CC) -o sol_opt.out $^ $(LIBS)
 
 # Prod MinGW Windows build:
 sol_win:CFLAGS = -Wall $(PROD_FLAGS)
