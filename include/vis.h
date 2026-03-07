@@ -35,3 +35,5 @@ void remove_vis_block(int block_size, int x_pos, int y_pos);
 
 void def_block_colors(int* in_block_colors, int size);
 COLOR get_block_color(int block_size);
+
+bool clean_vis();

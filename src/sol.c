@@ -34,6 +34,7 @@ VIS_F_PTR grid_reset_func;
 VIS_F_PTR grid_record_func;
 VIS_SET_F_PTR block_set_func;
 VIS_SET_F_PTR block_remove_func;
+VIS_I_PTR grid_clean_func;
 
 puzzle_def* my_puzzle;
 
@@ -113,7 +114,8 @@ void set_visualizer(VIS_I_PTR grid_init_func_in,
                     VIS_F_PTR grid_reset_func_in,
                     VIS_F_PTR grid_record_func_in,
                     VIS_SET_F_PTR block_set_func_in,
-                    VIS_SET_F_PTR block_remove_func_in) {
+                    VIS_SET_F_PTR block_remove_func_in,
+                    VIS_I_PTR grid_clean_func_in) {
     grid_init_func = grid_init_func_in;
     grid_prep_func = grid_prep_func_in;
     grid_render_func = grid_render_func_in;
@@ -121,6 +123,7 @@ void set_visualizer(VIS_I_PTR grid_init_func_in,
     grid_record_func = grid_record_func_in;
     block_set_func = block_set_func_in;
     block_remove_func = block_remove_func_in;
+    grid_clean_func = grid_clean_func_in;
 }
 
 tree_node* record_placement(int selected_tile,
@@ -329,7 +332,7 @@ int main(int argc, char* argv[]) {
     if(visualizer_set) {
         set_visualizer(init_terminal, prep_vis_grid, render_vis_grid,
                        reset_vis_grid, record_vis_grid, set_vis_block,
-                       remove_vis_block);
+                       remove_vis_block, clean_vis);
         visualizer_set = grid_init_func();
     }
     if(visualizer_set) {
@@ -394,9 +397,15 @@ int main(int argc, char* argv[]) {
     printWinningBranch(tree_fptr);
     printTree(placement_record.tree_root, 0, false, flags, tree_fptr);
 
-    // Close the files
+    // Close the files and free memory
     fclose(log_fptr);
     fclose(tree_fptr);
+
+    if(visualizer_set) {
+        grid_clean_func();
+    }
+    free(flags);
+    free(my_puzzle);
 
     return EXIT_SUCCESS;
 }

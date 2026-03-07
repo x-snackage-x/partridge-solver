@@ -28,5 +28,6 @@ void set_visualizer(VIS_I_PTR grid_init_func_in,
                     VIS_F_PTR grid_reset_func_in,
                     VIS_F_PTR grid_record_func_in,
                     VIS_SET_F_PTR block_set_func_in,
-                    VIS_SET_F_PTR block_remove_func_in);
+                    VIS_SET_F_PTR block_remove_func_in,
+                    VIS_I_PTR grid_clean_func_in);
 bool solution_search();

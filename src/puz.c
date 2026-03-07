@@ -64,6 +64,17 @@ void init_puzzle(puzzle_def* puzzle, bool override) {
     dynarr_init(puz_journal);
 }
 
+void free_puzzle(puzzle_def* puzzle) {
+    dynarr_free(puz_journal);
+    free(puz_journal);
+
+    free(puzzle->puzzle_grid[0]);
+    free(puzzle->puzzle_grid);
+
+    dynarr_free(puzzle->blocks);
+    free(puzzle->blocks);
+}
+
 int get_n_available_pieces(puzzle_def* puzzle_def, int block_id) {
     if(block_id > puzzle_def->size || block_id <= 0) {
         return 0;
@@ -252,6 +263,12 @@ void play_puzzle(puzzle_def* puzzle) {
                         "to input top-left position of block.\n");
                     break;
             }
+
+            if(is_puzzle_solved(puzzle)) {
+                print_grid(puzzle, stdout);
+                printf("Solved configuration found\n");
+                break;
+            }
         }
     }
 }
@@ -288,10 +305,11 @@ int main(int argc, char* argv[]) {
 
     if(argc > 1) {
         my_puzzle_def.size = (int)strtol(argv[1], NULL, 10);
-        printf("Puzzle definition: %d\n", my_puzzle_def.size);
     }
+    printf("Puzzle definition: %d\n", my_puzzle_def.size);
 
     init_puzzle(&my_puzzle_def, true);
     play_puzzle(&my_puzzle_def);
+    free_puzzle(&my_puzzle_def);
 }
 #endif

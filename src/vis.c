@@ -14,11 +14,14 @@
 #define STEP_SIZE 2
 
 COLOR* set_block_colors;
-int size;
 
 void def_block_colors(int* in_block_colors, int size) {
-    set_block_colors = malloc(sizeof(int) * size);
     memcpy(set_block_colors, in_block_colors, sizeof(int) * size);
+}
+
+bool clean_vis() {
+    free(set_block_colors);
+    return true;
 }
 
 COLOR get_block_color(int block_size) {
@@ -115,6 +118,7 @@ void prep_vis_grid(int size, int puzzle_type) {
     COLOR blocks[] = {WHITE,     ROYAL_BLUE, ORANGE,   MAGENTA, CYAN, RED,
                       GREEN,     GRAY,       DARKGRAY, YELLOW,  BLUE, HINGREEN,
                       HINYELLOW, HINBLUE,    PINK,     LIGRAY};
+    set_block_colors = malloc(sizeof(int) * size);
     def_block_colors((int*)blocks, puzzle_type);
 
     for(int line = 0; line < size; ++line) {
