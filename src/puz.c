@@ -10,6 +10,22 @@ dynarr_head* get_puzzle_journal() {
     return puz_journal;
 }
 
+puz_entry* get_first_entry() {
+    return (puz_entry*)puz_journal->ptr_first_elem;
+}
+
+int get_puz_journal_size() {
+    return (int)puz_journal->dynarr_size;
+}
+
+int get_puz_entry_size() {
+    return (int)sizeof(puz_entry);
+}
+
+int get_puzzle_def_size() {
+    return (int)sizeof(puzzle_def);
+}
+
 int find_journal_entry(puz_entry* needle) {
     puz_entry* ptr_journal = (puz_entry*)puz_journal->ptr_first_elem;
     size_t n_entries = puz_journal->dynarr_size;

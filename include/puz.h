@@ -53,6 +53,10 @@ bool placement_resolvable(puzzle_def* puzzle,
 bool is_puzzle_solved(puzzle_def* puzzle);
 
 dynarr_head* get_puzzle_journal();
+puz_entry* get_first_entry();
+int get_puz_journal_size();
+int get_puz_entry_size();
+int get_puzzle_def_size();
 
 void play_puzzle(puzzle_def* puzzle);
 void print_grid(puzzle_def* puzzle, FILE* file_ptr);

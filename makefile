@@ -104,13 +104,15 @@ sol_win: $(SOL_OBJS)
 	$(CC_WIN) -o sol_cli.exe $^
 
 # Export to WASM
-sol_WASM:CFLAGS=-Wall $(PROD_FLAGS) 							\
+sol_WASM:CFLAGS=-Wall $(PROD_FLAGS) 										\
 				-sEXPORTED_FUNCTIONS=_malloc,_free,_init_puzzle,$\
 					_free_puzzle,_place_block,_remove_block,$\
 					_get_n_available_pieces,_placement_resolvable,$\
-					_is_puzzle_solved,_get_puzzle_journal,_print_grid,$\
+					_is_puzzle_solved,_get_first_entry,$\
+					_get_puz_entry_size,_get_puzzle_def_size,$\
+					_get_puz_journal_size,_print_grid,$\
 					_print_free_pieces,_setup,_set_visualizer,$\
-					_solution_search					\
+					_solution_search										\
 				-sEXPORTED_RUNTIME_METHODS=ccall,cwrap,setValue,getValue	\
 				-sMODULARIZE=1 -sEXPORT_ES6=1 
 
