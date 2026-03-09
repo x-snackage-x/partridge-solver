@@ -27,20 +27,17 @@ typedef struct node_placement {
     uint16_t valid_tiles;
 } node_placement;
 
-typedef bool (*VIS_I_PTR)(bool);
-typedef bool (*VIS_C_PTR)(bool, int);
 typedef void (*VIS_F_PTR)(int);
 typedef void (*VIS_SET_F_PTR)(int, int, int);
-typedef void (*VIS_SET_C_PTR)(int, int);
+typedef void (*LOG_T_F_PTR)(int);
+typedef void (*LOG_R_F_PTR)(int, int, int);
 
 void setup(puzzle_def* start_puzzle);
-void set_visualizer(VIS_I_PTR grid_init_func_in,
-                    VIS_SET_C_PTR grid_prep_func_in,
-                    VIS_F_PTR grid_render_func_in,
+void set_visualizer(VIS_F_PTR grid_render_func_in,
                     VIS_F_PTR grid_reset_func_in,
-                    VIS_F_PTR grid_record_func_in,
                     VIS_SET_F_PTR block_set_func_in,
-                    VIS_SET_F_PTR block_remove_func_in,
-                    VIS_C_PTR grid_clean_func_in);
-void init_visualizer();
+                    VIS_SET_F_PTR block_remove_func_in);
+void set_logger(LOG_T_F_PTR log_put_ok_func_in,
+                LOG_T_F_PTR log_put_nok_func_in,
+                LOG_R_F_PTR log_remove_func_in);
 bool solution_search();

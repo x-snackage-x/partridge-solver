@@ -23,12 +23,9 @@
 FILE* log_fptr;
 FILE* tree_fptr;
 
-bool print_full_log;
+bool full_log;
 bool override;
 extern bool visualizer_set;
-
-extern VIS_F_PTR grid_record_func;
-extern VIS_C_PTR grid_clean_func;
 
 extern puzzle_def* my_puzzle;
 
@@ -50,9 +47,12 @@ void printTree(tree_node* ptr_node,
                bool isLast,
                bool* flag,
                FILE* file_ptr);
+void log_tile_put_ok(int tile_type);
+void log_tile_put_nok(int tile_type);
+void log_tile_remove(int tile_type, int x_pos, int y_pos);
 
 int main(int argc, char* argv[]) {
-    print_full_log = false;
+    full_log = false;
     visualizer_set = false;
     override = false;
     int puzzle_type = 8;
@@ -87,16 +87,39 @@ int main(int argc, char* argv[]) {
     }
 
     if(visualizer_set) {
-        set_visualizer(init_terminal, prep_vis_grid, render_vis_grid,
-                       reset_vis_grid, record_vis_grid, set_vis_block,
-                       remove_vis_block, clean_vis);
-        init_visualizer();
+        visualizer_set = init_terminal(true);
     }
+
+    if(visualizer_set) {
+        prep_vis_grid(my_puzzle->grid_dimension, my_puzzle->size);
+
+        // render start config if set
+        dynarr_head* puzzle_journal = get_puzzle_journal();
+        puz_entry* ptr_journal = (puz_entry*)puzzle_journal->ptr_first_elem;
+        for(int i = 0; i < puzzle_journal->dynarr_size; ++i) {
+            int x_pos = ptr_journal->x_pos;
+            int y_pos = ptr_journal->y_pos;
+            int type = ptr_journal->type;
+            set_vis_block_color(type, BLACK, x_pos, y_pos);
+            ++ptr_journal;
+        }
+
+        render_vis_grid(my_puzzle->grid_dimension);
+        reset_vis_grid(my_puzzle->grid_dimension);
+
+        set_visualizer(render_vis_grid, reset_vis_grid, set_vis_block,
+                       remove_vis_block);
+    }
+
 #ifdef _WIN32
     Sleep(0.5);
 #else
     usleep(5 * 10000);
 #endif
+
+    if(full_log) {
+        set_logger(log_tile_put_ok, log_tile_put_nok, log_tile_remove);
+    }
 
     // enable thousand separator
     setlocale(LC_NUMERIC, "");
@@ -109,10 +132,10 @@ int main(int argc, char* argv[]) {
     double solve_time = (double)(end - begin) / CLOCKS_PER_SEC;
 
     if(is_solved && visualizer_set) {
-        grid_record_func(my_puzzle->grid_dimension);
+        record_vis_grid(my_puzzle->grid_dimension);
     }
     if(visualizer_set) {
-        grid_clean_func(!is_solved, my_puzzle->grid_dimension);
+        clean_vis(!is_solved, my_puzzle->grid_dimension);
     }
 
     fprintf(log_fptr, "Puzzle Status: Solvable: %s - Solved: %s\n\n",
@@ -204,7 +227,7 @@ void handle_input(int argc, char** argv, int* puzzle_type, FILE** in_ptr_ptr) {
         if(strcmp(argv[i], "vis") == 0) {
             visualizer_set = true;
         } else if(strcmp(argv[i], "fulllog") == 0) {
-            print_full_log = true;
+            full_log = true;
         } else if(strcmp(argv[i], "override") == 0) {
             override = true;
         } else if(strcmp(argv[i], "readin") == 0) {
@@ -431,4 +454,19 @@ void printTree(tree_node* ptr_node,
         child_node_ptr = *(++pointer_to_children_pointers);
     }
     flag[depth] = true;
+}
+
+void log_tile_put_ok(int tile_type) {
+    fprintf(log_fptr, "Current tile: %d - Placement success: true\n",
+            tile_type);
+}
+
+void log_tile_put_nok(int tile_type) {
+    fprintf(log_fptr, "Current tile: %d - Placement success: false\n",
+            tile_type);
+}
+
+void log_tile_remove(int tile_type, int x_pos, int y_pos) {
+    fprintf(log_fptr, " Remove tile: %d, Pos. (%2d,%2d)\n", tile_type, x_pos,
+            y_pos);
 }

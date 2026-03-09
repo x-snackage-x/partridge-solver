@@ -7,19 +7,16 @@
 #include <sol.h>
 #include <vis.h>
 
-extern FILE* log_fptr;
-extern bool print_full_log;
-
 bool visualizer_set;
-
-VIS_I_PTR grid_init_func;
-VIS_SET_C_PTR grid_prep_func;
 VIS_F_PTR grid_render_func;
 VIS_F_PTR grid_reset_func;
-VIS_F_PTR grid_record_func;
 VIS_SET_F_PTR block_set_func;
 VIS_SET_F_PTR block_remove_func;
-VIS_C_PTR grid_clean_func;
+
+bool full_logging;
+LOG_T_F_PTR log_put_ok_func;
+LOG_T_F_PTR log_put_nok_func;
+LOG_R_F_PTR log_remove_func;
 
 puzzle_def* my_puzzle;
 
@@ -48,6 +45,8 @@ int n_ok_tile_types(uint16_t valid_tiles);
 void setup(puzzle_def* start_puzzle) {
     my_puzzle = start_puzzle;
 
+    full_logging = false;
+
     srand(time(NULL));
 
     // place Dummy root node
@@ -71,34 +70,24 @@ void setup(puzzle_def* start_puzzle) {
     free(node_buffer);
 }
 
-void set_visualizer(VIS_I_PTR grid_init_func_in,
-                    VIS_SET_C_PTR grid_prep_func_in,
-                    VIS_F_PTR grid_render_func_in,
+void set_visualizer(VIS_F_PTR grid_render_func_in,
                     VIS_F_PTR grid_reset_func_in,
-                    VIS_F_PTR grid_record_func_in,
                     VIS_SET_F_PTR block_set_func_in,
-                    VIS_SET_F_PTR block_remove_func_in,
-                    VIS_C_PTR grid_clean_func_in) {
-    grid_init_func = grid_init_func_in;
-    grid_prep_func = grid_prep_func_in;
+                    VIS_SET_F_PTR block_remove_func_in) {
     grid_render_func = grid_render_func_in;
     grid_reset_func = grid_reset_func_in;
-    grid_record_func = grid_record_func_in;
     block_set_func = block_set_func_in;
     block_remove_func = block_remove_func_in;
-    grid_clean_func = grid_clean_func_in;
 }
 
-void init_visualizer() {
-    visualizer_set = grid_init_func(true);
+void set_logger(LOG_T_F_PTR log_put_ok_func_in,
+                LOG_T_F_PTR log_put_nok_func_in,
+                LOG_R_F_PTR log_remove_func_in) {
+    log_put_ok_func = log_put_ok_func_in;
+    log_put_nok_func = log_put_nok_func_in;
+    log_remove_func = log_remove_func_in;
 
-    if(visualizer_set) {
-        grid_prep_func(my_puzzle->grid_dimension, my_puzzle->size);
-
-        // record root tile
-        grid_render_func(my_puzzle->grid_dimension);
-        grid_reset_func(my_puzzle->grid_dimension);
-    }
+    full_logging = true;
 }
 
 tree_node* record_placement(int selected_tile,
@@ -123,6 +112,9 @@ tree_node* record_placement(int selected_tile,
         grid_reset_func(my_puzzle->grid_dimension);
     }
 
+    if(full_logging)
+        log_put_ok_func(selected_tile);
+
     return tree_result.node_ptr;
 }
 
@@ -144,6 +136,9 @@ uint16_t record_removal(int selected_tile,
         grid_render_func(my_puzzle->grid_dimension);
         grid_reset_func(my_puzzle->grid_dimension);
     }
+
+    if(full_logging)
+        log_remove_func(selected_tile, x_pos, y_pos);
 
     return parent_placement_data->valid_tiles;
 }
@@ -178,25 +173,20 @@ bool solution_search() {
         do {
             int selected_tile =
                 random_tile_select(placement_data->valid_tiles, puzzle_type);
-            if(print_full_log)
-                fprintf(log_fptr, "Current tile: %d", selected_tile);
 
             placement_code =
                 place_block(my_puzzle, selected_tile, result_buffer.x_index,
                             result_buffer.y_index);
 
             if(placement_code == SUCCESS) {
-                if(print_full_log)
-                    fprintf(log_fptr, " - Placement success: true\n");
-
                 last_placement =
                     record_placement(selected_tile, result_buffer.x_index,
                                      result_buffer.y_index, last_placement);
             } else {
                 placement_data->valid_tiles &= ~(1 << (selected_tile - 1));
 
-                if(print_full_log)
-                    fprintf(log_fptr, " - Placement success: false\n");
+                if(full_logging)
+                    log_put_nok_func(selected_tile);
             }
 
             valid_tiles_buffer = placement_data->valid_tiles;
@@ -216,11 +206,6 @@ bool solution_search() {
                 cur_placement_data.tile_type, cur_placement_data.x_pos,
                 cur_placement_data.y_pos, last_placement, parent);
 
-            if(print_full_log)
-                fprintf(log_fptr, " Remove tile: %d, Pos. (%2d,%2d)\n",
-                        cur_placement_data.tile_type, cur_placement_data.x_pos,
-                        cur_placement_data.y_pos);
-
             last_placement = parent;
         }
 
@@ -230,12 +215,6 @@ bool solution_search() {
                 *(node_placement*)last_placement->data;
 
             if(last_placement == placement_record.tree_root) {
-                if(print_full_log)
-                    fprintf(log_fptr,
-                            " Remove tile: %d, Pos. (%2d,%2d) - Root\n\n",
-                            cur_placement_data.tile_type,
-                            cur_placement_data.x_pos, cur_placement_data.y_pos);
-
                 if(visualizer_set) {
                     block_remove_func(cur_placement_data.tile_type,
                                       cur_placement_data.x_pos,
@@ -253,11 +232,6 @@ bool solution_search() {
             valid_tiles_buffer = record_removal(
                 cur_placement_data.tile_type, cur_placement_data.x_pos,
                 cur_placement_data.y_pos, last_placement, parent);
-
-            if(print_full_log)
-                fprintf(log_fptr, " Remove tile: %d, Pos. (%2d,%2d)\n",
-                        cur_placement_data.tile_type, cur_placement_data.x_pos,
-                        cur_placement_data.y_pos);
 
             last_placement = parent;
         }

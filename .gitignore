@@ -54,8 +54,8 @@ dkms.conf
 # debug information files
 *.dwo
 
-# build directory
-build/
+# Object directory
+obj/
 
 # logs directory
 logs/
