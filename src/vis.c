@@ -14,12 +14,20 @@
 #define STEP_SIZE 2
 
 COLOR* set_block_colors;
+bool with_points;
 
 void def_block_colors(int* in_block_colors, int size) {
     memcpy(set_block_colors, in_block_colors, sizeof(int) * size);
 }
 
-bool clean_vis() {
+bool clean_vis(bool clean_grid, int size) {
+    if(clean_grid) {
+        for(int line = 0; line < size; ++line) {
+            printf("%*c\n", STEP_SIZE * size, ' ');
+        }
+        reset_vis_grid(size);
+    }
+
     free(set_block_colors);
     return true;
 }
@@ -67,11 +75,11 @@ void remove_vis_block(int block_size, int x_pos, int y_pos) {
 
     for(int i = 0; i < block_size; ++i) {
         for(int j = 0; j < block_size; ++j) {
-#ifdef TESTING
-            printf("..");
-#else
-            printf("  ");
-#endif
+            if(with_points) {
+                printf("..");
+            } else {
+                printf("  ");
+            }
         }
         printf("\x1b[1B\x1b[%dG", x_shift);
     }
@@ -84,7 +92,8 @@ void render_vis_grid(int size) {
     fflush(stdout);
 }
 
-bool init_terminal() {
+bool init_terminal(bool set_points) {
+    with_points = set_points;
     bool is_successful = true;
 
 #ifdef _WIN32
@@ -122,14 +131,14 @@ void prep_vis_grid(int size, int puzzle_type) {
     def_block_colors((int*)blocks, puzzle_type);
 
     for(int line = 0; line < size; ++line) {
-#ifdef TESTING
-        for(int i = 0; i < STEP_SIZE * size; i++) {
-            putchar('.');
+        if(with_points) {
+            for(int i = 0; i < STEP_SIZE * size; i++) {
+                putchar('.');
+            }
+            putchar('\n');
+        } else {
+            printf("%*c\n", STEP_SIZE * size, ' ');
         }
-        putchar('\n');
-#else
-        printf("%*c\n", STEP_SIZE * size, ' ');
-#endif
     }
 
     printf("\x1b[%dA", size);

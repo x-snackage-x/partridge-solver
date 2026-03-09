@@ -54,7 +54,8 @@ SOL_ODIR=obj/sol
 SOL_OBJS= $(SOL_ODIR)/elhaylib.o \
         	$(SOL_ODIR)/vis.o \
         	$(SOL_ODIR)/puz.o \
-        	$(SOL_ODIR)/sol.o
+        	$(SOL_ODIR)/sol.o \
+			$(SOL_ODIR)/sol_cli.o
 
 $(SOL_ODIR)/%.o: $(SDIR)/%.c $(DEPS) | $(SOL_ODIR)
 	$(CC) -c $(INC) $(CFLAGS) $< -o $@
@@ -63,7 +64,7 @@ $(SOL_ODIR):
 	mkdir -p $@
 
 sol: $(SOL_OBJS)
-	$(CC) -o sol.out $^ $(LIBS)
+	$(CC) -o sol_cli.out $^ $(LIBS)
 
 # Prod Linux build 
 sol_opt:CFLAGS = -Wall $(PROD_FLAGS)
@@ -71,7 +72,8 @@ SOL_OPT_ODIR=obj/sol_opt
 SOL_OBJS= $(SOL_OPT_ODIR)/elhaylib.o \
 		    $(SOL_OPT_ODIR)/vis.o \
 		    $(SOL_OPT_ODIR)/puz.o \
-		    $(SOL_OPT_ODIR)/sol.o
+		    $(SOL_OPT_ODIR)/sol.o \
+			$(SOL_OPT_ODIR)/sol_cli.o
 
 $(SOL_OPT_ODIR)/%.o: $(SDIR)/%.c $(DEPS) | $(SOL_OPT_ODIR)
 	$(CC) -c $(INC) $(CFLAGS) $< -o $@
@@ -80,7 +82,7 @@ $(SOL_OPT_ODIR):
 	mkdir -p $@
 
 sol_opt: $(SOL_OBJS)
-	$(CC) -o sol_opt.out $^ $(LIBS)
+	$(CC) -o sol_cli_opt.out $^ $(LIBS)
 
 # Prod MinGW Windows build:
 sol_win:CFLAGS = -Wall $(PROD_FLAGS)
@@ -88,7 +90,8 @@ SOL_WIN_ODIR=obj/sol_mingw
 SOL_OBJS= $(SOL_WIN_ODIR)/elhaylib.o \
 		    $(SOL_WIN_ODIR)/vis.o \
 		    $(SOL_WIN_ODIR)/puz.o \
-		    $(SOL_WIN_ODIR)/sol.o
+		    $(SOL_WIN_ODIR)/sol.o \
+			$(SOL_WIN_ODIR)/sol_cli.o
 
 $(SOL_WIN_ODIR)/%.o: $(SDIR)/%.c $(DEPS) | $(SOL_WIN_ODIR)
 	$(CC_WIN) -c $(INC) $(CFLAGS) $< -o $@
@@ -97,7 +100,7 @@ $(SOL_WIN_ODIR):
 	mkdir -p $@
 
 sol_win: $(SOL_OBJS)
-	$(CC_WIN) -o sol.exe $^
+	$(CC_WIN) -o sol_cli.exe $^
 
 
 # --------------------

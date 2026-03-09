@@ -2,8 +2,6 @@
 
 #include <stdbool.h>
 
-#define TESTING
-
 typedef enum COLOR {
     BLACK = 0,
     RED = 1,
@@ -24,7 +22,7 @@ typedef enum COLOR {
     DARKGRAY = 235
 } COLOR;
 
-bool init_terminal();
+bool init_terminal(bool set_points);
 void prep_vis_grid(int size, int puzzle_type);
 void render_vis_grid(int size);
 void reset_vis_grid(int size);
@@ -36,4 +34,4 @@ void remove_vis_block(int block_size, int x_pos, int y_pos);
 void def_block_colors(int* in_block_colors, int size);
 COLOR get_block_color(int block_size);
 
-bool clean_vis();
+bool clean_vis(bool clean_grid, int size);
