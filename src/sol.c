@@ -64,8 +64,8 @@ void setup(puzzle_def* start_puzzle) {
     node_buffer->y_pos = -1;
     node_buffer->valid_tiles = valid_tiles;
 
-    tree_node_root(&tree_result, &placement_record, NODE_PARTRIDGE, node_size,
-                   node_buffer);
+    tree_node_root(&tree_result, &placement_record, (node_type)NODE_PARTRIDGE,
+                   node_size, node_buffer);
     last_placement = tree_result.node_ptr;
     free(node_buffer);
 }
@@ -101,7 +101,7 @@ tree_node* record_placement(int selected_tile,
     node_buffer->valid_tiles = 0xFFFF;
 
     tree_node_add(&tree_result, &placement_record, prev_placement,
-                  NODE_PARTRIDGE, node_size, node_buffer);
+                  (node_type)NODE_PARTRIDGE, node_size, node_buffer);
     free(node_buffer);
     ++tree_max;
 

@@ -10,7 +10,7 @@ The solver is implemented as a console program that can be called with four opti
 The defaults are: `8 novis nofulllog nooverride`  
 
 ```shell
-wd$: ./sol.out <integer> <vis|novis> <fulllog|nofulllog> <override|nooverride>
+wd$: ./sol_cli.out <integer> <vis|novis> <fulllog|nofulllog> <override|nooverride>
 ```
 
 To pass a starting configuration by way of an input file save the definition under `start.in` placed in the execution directory and pass the command line argument `readin`. The puzzle definition input argument is omitted when using an input file. The file needs to conform to the following structure:
@@ -22,7 +22,7 @@ To pass a starting configuration by way of an input file save the definition und
 ``` 
 
 ```shell
-wd$: ./sol.out <readin> <vis|novis> <fulllog|nofulllog> <override|nooverride>
+wd$: ./sol_cli.out <readin> <vis|novis> <fulllog|nofulllog> <override|nooverride>
 ```
 
 An example `start.in` is provided.
@@ -71,6 +71,3 @@ Visualizer
 - Utilize "Alternate Screen Buffer" to make visualizer robust to scrolling behaviour  
 - Figure out if perfect squares are possible with moderate effort
 - Implement a GUI using `raylib`/`raygui`
-
-Portability
-- Port to WASM using `Emscripten`?

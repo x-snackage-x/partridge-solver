@@ -1,7 +1,8 @@
 IDIR=include
 SDIR=src
 CC=cc
-CC_WIN = x86_64-w64-mingw32-gcc
+CC_WIN=x86_64-w64-mingw32-gcc
+CC_WASM=emcc
 DEBUG_FLAGS = -g3 -Og -fno-omit-frame-pointer
 CFLAGS=-Wall $(DEBUG_FLAGS)
 PROD_FLAGS = -O2
@@ -64,10 +65,10 @@ $(SOL_ODIR):
 	mkdir -p $@
 
 sol: $(SOL_OBJS)
-	$(CC) -o sol_cli.out $^ $(LIBS)
+	$(CC) -o sol_cli_dev.out $^ $(LIBS)
 
 # Prod Linux build 
-sol_opt:CFLAGS = -Wall $(PROD_FLAGS)
+sol_opt:CFLAGS=-Wall $(PROD_FLAGS)
 SOL_OPT_ODIR=obj/sol_opt
 SOL_OBJS= $(SOL_OPT_ODIR)/elhaylib.o \
 		    $(SOL_OPT_ODIR)/vis.o \
@@ -82,10 +83,10 @@ $(SOL_OPT_ODIR):
 	mkdir -p $@
 
 sol_opt: $(SOL_OBJS)
-	$(CC) -o sol_cli_opt.out $^ $(LIBS)
+	$(CC) -o sol_cli.out $^ $(LIBS)
 
 # Prod MinGW Windows build:
-sol_win:CFLAGS = -Wall $(PROD_FLAGS)
+sol_win:CFLAGS=-Wall $(PROD_FLAGS)
 SOL_WIN_ODIR=obj/sol_mingw
 SOL_OBJS= $(SOL_WIN_ODIR)/elhaylib.o \
 		    $(SOL_WIN_ODIR)/vis.o \
@@ -101,6 +102,28 @@ $(SOL_WIN_ODIR):
 
 sol_win: $(SOL_OBJS)
 	$(CC_WIN) -o sol_cli.exe $^
+
+# Export to WASM
+sol_WASM:CFLAGS=-Wall $(PROD_FLAGS) 							\
+				-sEXPORTED_FUNCTIONS=_malloc,_free,_init_puzzle,$\
+					_free_puzzle,_place_block,_remove_block,$\
+					_get_n_available_pieces,_placement_resolvable,$\
+					_is_puzzle_solved,_get_puzzle_journal,_print_grid,$\
+					_print_free_pieces,_setup,_set_visualizer,$\
+					_solution_search					\
+				-sEXPORTED_RUNTIME_METHODS=ccall,cwrap,setValue,getValue	\
+				-sMODULARIZE=1 -sEXPORT_ES6=1 
+
+SOL_WEB_ODIR=obj/sol_web
+SOL_SRCS= $(SDIR)/elhaylib.c \
+		  	$(SDIR)/puz.c \
+			$(SDIR)/sol.c \
+
+$(SOL_WEB_ODIR):
+	mkdir -p $@
+
+sol_WASM:
+	$(CC_WASM) $(SOL_SRCS) $(INC) $(LIBS) -o $(SOL_WEB_ODIR)/solWASM.js $(CFLAGS)
 
 
 # --------------------
