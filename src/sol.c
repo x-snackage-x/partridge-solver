@@ -194,7 +194,7 @@ bool solution_search() {
                 n_ok_tile_types(valid_tiles_buffer) > 0);
 
         is_solvable = is_solvable_gap_cond(my_puzzle);
-        if(!is_solvable) {
+        if(!is_solvable && last_placement != placement_record.tree_root) {
             tree_node* parent = last_placement->parent;
             node_placement cur_placement_data =
                 *(node_placement*)last_placement->data;

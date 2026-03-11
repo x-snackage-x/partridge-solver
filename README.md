@@ -29,7 +29,23 @@ An example `start.in` is provided.
 
 Currently, the terminal visualizer will only work for grid sizes and terminal window sizes that don't result in scrolling behavior.
 
-A `makefile` is provided for building the project as either a Linux or Windows application. 
+## Build
+
+A `makefile` is provided for building the project as either a Linux, Windows application or Emscripten-compiled WebAssembly binary and JavaScript interface file. The WebAssembly build includes only the core puzzle and solver logic without the CLI portion.
+
+To build:
+
+```shell
+wd$: make <all|vis|puz|sol|sol_opt|sol_win|sol_WASM>
+```
+
+`make all`/`make` will build sol, sol_opt, sol_win and sol_WASM.
+
+Note: To compile to WebAssembly make sure to activate Emscripten for the current terminal before building:
+
+```shell
+wd$:  source "[...]/emsdk_env.sh"
+```
 
 ## Useful links puzzle
 

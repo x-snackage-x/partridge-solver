@@ -14,7 +14,8 @@ _DEPS=elhaylib.h vis.h puz.h sol.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS))
 
 # Default
-all: sol sol_opt sol_win
+all: sol sol_opt sol_win sol_WASM
+sol_cli: sol
 
 # --------------------
 # VIS
@@ -124,7 +125,7 @@ SOL_SRCS= $(SDIR)/elhaylib.c \
 $(SOL_WEB_ODIR):
 	mkdir -p $@
 
-sol_WASM:
+sol_WASM: | $(SOL_WEB_ODIR)
 	$(CC_WASM) $(SOL_SRCS) $(INC) $(LIBS) -o $(SOL_WEB_ODIR)/solWASM.js $(CFLAGS)
 
 
