@@ -113,9 +113,10 @@ sol_WASM:CFLAGS=-Wall $(PROD_FLAGS) 										\
 					_get_puz_entry_size,_get_puzzle_def_size,$\
 					_get_puz_journal_size,_print_grid,$\
 					_print_free_pieces,_setup,_set_visualizer,$\
-					_solution_search										\
-				-sEXPORTED_RUNTIME_METHODS=ccall,cwrap,setValue,getValue	\
-				-sMODULARIZE=1 -sEXPORT_ES6=1 
+					_visualizer_on,_visualizer_off,_solution_search			\
+				-sEXPORTED_RUNTIME_METHODS=ccall,cwrap,setValue,getValue,$\
+				 addFunction												\
+				-sALLOW_TABLE_GROWTH -sMODULARIZE=1 -sEXPORT_ES6=1 
 
 SOL_WEB_ODIR=obj/sol_web
 SOL_SRCS= $(SDIR)/elhaylib.c \

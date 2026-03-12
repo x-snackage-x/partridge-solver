@@ -296,7 +296,7 @@ void handle_input(int argc, char** argv, int* puzzle_type, FILE** in_ptr_ptr) {
         } else {
             printf(
                 "Command Line argument not recognized: only $number, "
-                "vis/novis, fulllog/nofulllog override/nooverride are "
+                "vis/novis, fulllog/nofulllog override/nooverride readin are "
                 "accepted.\n"
                 "Usage example: ./sol.out 8 vis nofulllog\n");
             return exit(EXIT_FAILURE);

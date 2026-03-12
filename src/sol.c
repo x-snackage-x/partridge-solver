@@ -7,7 +7,7 @@
 #include <sol.h>
 #include <vis.h>
 
-bool visualizer_set;
+bool visualizer_set = false;
 VIS_F_PTR grid_render_func;
 VIS_F_PTR grid_reset_func;
 VIS_SET_F_PTR block_set_func;
@@ -78,6 +78,16 @@ void set_visualizer(VIS_F_PTR grid_render_func_in,
     grid_reset_func = grid_reset_func_in;
     block_set_func = block_set_func_in;
     block_remove_func = block_remove_func_in;
+}
+
+bool visualizer_on() {
+    visualizer_set = true;
+    return visualizer_set;
+}
+
+bool visualizer_off() {
+    visualizer_set = false;
+    return visualizer_set;
 }
 
 void set_logger(LOG_T_F_PTR log_put_ok_func_in,

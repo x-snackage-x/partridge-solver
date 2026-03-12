@@ -33,6 +33,8 @@ typedef void (*LOG_T_F_PTR)(int);
 typedef void (*LOG_R_F_PTR)(int, int, int);
 
 void setup(puzzle_def* start_puzzle);
+bool visualizer_on();
+bool visualizer_off();
 void set_visualizer(VIS_F_PTR grid_render_func_in,
                     VIS_F_PTR grid_reset_func_in,
                     VIS_SET_F_PTR block_set_func_in,
