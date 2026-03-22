@@ -20,6 +20,10 @@
 #include <sol.h>
 #include <vis.h>
 
+#define STBIW_ASSERT(x)
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
 FILE* log_fptr;
 FILE* tree_fptr;
 
@@ -40,6 +44,7 @@ extern uint64_t tree_max;
 puzzle_def* setup_puzzle(int puzzle_type, FILE** in_ptr_ptr);
 void handle_input(int argc, char** argv, int* puzzle_type, FILE** in_fptr);
 int is_integer(const char* arg);
+void createSolutionImage(char const* filename);
 void printWinningBranch(FILE* file_ptr);
 void printNode(tree_node* ptr_node, FILE* file_ptr);
 void printTree(tree_node* ptr_node,
@@ -73,6 +78,7 @@ int main(int argc, char* argv[]) {
     // Open a file in writing mode
     log_fptr = fopen("logs/log.txt", "w");
     tree_fptr = fopen("logs/tree.txt", "w");
+    const char* img_name = "logs/gridSolution.png";
 
     puzzle_def* start_puzzle = setup_puzzle(puzzle_type, &in_ptr);
     setup(start_puzzle);
@@ -145,6 +151,7 @@ int main(int argc, char* argv[]) {
     printf("\33[2K\r\n");
 
     if(is_solved) {
+        createSolutionImage(img_name);
         print_grid(my_puzzle, NULL);
         print_grid(my_puzzle, log_fptr);
         printf("\n");
@@ -324,6 +331,38 @@ int is_integer(const char* arg) {
     }
 
     return 1;
+}
+
+void createSolutionImage(char const* filename) {
+    int nComp = 3;
+    uint8_t colors[][3] = {
+        {255, 255, 255}, {0, 0, 128},    {252, 127, 0},   {128, 0, 128},
+        {0, 128, 128},   {196, 0, 0},    {0, 128, 0},     {128, 128, 128},
+        {51, 51, 51},    {229, 229, 16}, {0, 55, 218},    {0, 255, 0},
+        {255, 255, 0},   {0, 0, 255},    {255, 192, 203}, {192, 192, 192}};
+
+    int elementSize = 20;
+    int imgWidth = elementSize * my_puzzle->grid_dimension;
+    int imgHeight = elementSize * my_puzzle->grid_dimension;
+    int imageIndex = 0;
+
+    uint8_t* data = malloc(imgWidth * imgHeight * sizeof(uint8_t) * nComp);
+    int** grid = my_puzzle->puzzle_grid;
+    for(int row = 0; row < my_puzzle->grid_dimension; ++row) {
+        for(int n_pixel = 0; n_pixel < elementSize; ++n_pixel) {
+            for(int column = 0; column < my_puzzle->grid_dimension; ++column) {
+                int colorIndex = grid[row][column] - 1;
+                for(int n_pixel = 0; n_pixel < elementSize; ++n_pixel) {
+                    data[imageIndex++] = colors[colorIndex][0];
+                    data[imageIndex++] = colors[colorIndex][1];
+                    data[imageIndex++] = colors[colorIndex][2];
+                }
+            }
+        }
+    }
+
+    stbi_write_png(filename, imgWidth, imgHeight, nComp, data,
+                   nComp * imgWidth);
 }
 
 void printWinningBranch(FILE* file_ptr) {

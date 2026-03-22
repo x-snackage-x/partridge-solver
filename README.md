@@ -77,7 +77,6 @@ Makefile starting guide:
 ## Open Tasks/Improvements:
 
 Solver Improvements:
-1. Add image generation of a solution using `stb_image_write.h`
 1. Implement additional more sophisticated `is_solvable` algos?
 1. Improve code quality and cleanup
 
@@ -86,5 +85,4 @@ Dev. Env. ToDos:
 
 Visualizer  
 - Utilize "Alternate Screen Buffer" to make visualizer robust to scrolling behaviour  
-- Figure out if perfect squares are possible with moderate effort
 - Implement a GUI using `raylib`/`raygui`
