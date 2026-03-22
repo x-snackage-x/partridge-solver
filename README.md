@@ -1,6 +1,6 @@
 # Partridge Puzzle Solver
 
-A Partridge Puzzle solver inspired by the Stand-up Maths video ["The impossible puzzle with over a million solutions!"](https://www.youtube.com/watch?v=eqyuQZHfNPQ). In addition to being an interesting problem to solve, this project was also an opportunity to use by personal generic data structures library [elhaylib](https://github.com/x-snackage-x/elhaylib) and vet it against a real use case. 
+A Partridge Puzzle solver inspired by the **Stand-up Maths video** ["The impossible puzzle with over a million solutions!"](https://www.youtube.com/watch?v=eqyuQZHfNPQ) (because of YouTube's A/B-Testing stuff, the current title might be different). In addition to being an interesting problem to solve, this project was also an opportunity to use by personal generic data structures library [elhaylib](https://github.com/x-snackage-x/elhaylib) and vet it against a real use case. 
 
 https://github.com/user-attachments/assets/3a07d338-07fe-4609-9ce8-4c470945a787
 
@@ -77,6 +77,7 @@ Makefile starting guide:
 ## Open Tasks/Improvements:
 
 Solver Improvements:
+1. Add image generation of a solution using `stb_image_write.h`
 1. Implement additional more sophisticated `is_solvable` algos?
 1. Improve code quality and cleanup
 

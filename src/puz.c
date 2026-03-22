@@ -290,13 +290,15 @@ void play_puzzle(puzzle_def* puzzle) {
 }
 
 void print_grid(puzzle_def* puzzle, FILE* file_ptr) {
+    int width = puzzle->size > 9 ? 2 : 1;
+
     if(file_ptr == NULL)
         file_ptr = stdout;
 
     int** grid = puzzle->puzzle_grid;
     for(int i = 0; i < puzzle->grid_dimension; ++i) {
         for(int j = 0; j < puzzle->grid_dimension; ++j) {
-            fprintf(file_ptr, "%d|", grid[i][j]);
+            fprintf(file_ptr, "%0*d|", width, grid[i][j]);
         }
         fprintf(file_ptr, "\n");
     }

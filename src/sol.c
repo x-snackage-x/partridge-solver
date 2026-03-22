@@ -159,6 +159,10 @@ bool solution_search() {
     is_solvable = is_solvable_gap_cond(my_puzzle);
     is_solved = is_puzzle_solved(my_puzzle);
 
+    if(!is_solvable) {
+        goto finish;
+    }
+
     uint16_t valid_tiles_buffer = 0xFFFF;
 
     point result_buffer = {0};
@@ -308,6 +312,7 @@ bool find_smallest_gap(puzzle_def* puzzle, gap_search_result* res_struct) {
                 }
                 index_buffer = 0;
                 am_counting = false;
+                line_gap_count = 0;
             }
         }
         if(size_hor_scan > line_gap_count && am_counting) {
@@ -343,6 +348,7 @@ bool find_smallest_gap(puzzle_def* puzzle, gap_search_result* res_struct) {
                 }
                 index_buffer = 0;
                 am_counting = false;
+                column_gap_count = 0;
             }
         }
         if(size_ver_scan > column_gap_count && am_counting) {
