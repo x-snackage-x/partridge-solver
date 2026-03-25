@@ -310,7 +310,7 @@ void print_free_pieces(puzzle_def* puzzle, FILE* file_ptr) {
 
     block_def* my_blocks = (block_def*)puzzle->blocks->ptr_first_elem;
     for(int i = 0; i < puzzle->blocks->dynarr_capacity; ++i) {
-        fprintf(file_ptr, "Block size: %d    Free pieces: %d\n",
+        fprintf(file_ptr, "Block size: %2d    Free pieces: %2d\n",
                 my_blocks->size, get_n_available_pieces(puzzle, i));
         ++my_blocks;
     }
