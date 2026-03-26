@@ -43,7 +43,7 @@ extern uint64_t tree_max;
 
 puzzle_def* setup_puzzle(int puzzle_type, FILE** in_ptr_ptr);
 void handle_input(int argc, char** argv, int* puzzle_type, FILE** in_fptr);
-int is_integer(const char* arg);
+int is_integer(char const* arg);
 void createSolutionImage(char const* filename);
 void printWinningBranch(FILE* file_ptr);
 void printNode(tree_node* ptr_node, FILE* file_ptr);
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
     // Open a file in writing mode
     log_fptr = fopen("logs/log.txt", "w");
     tree_fptr = fopen("logs/tree.txt", "w");
-    const char* img_name = "logs/gridSolution.png";
+    char const* img_name = "logs/gridSolution.png";
 
     puzzle_def* start_puzzle = setup_puzzle(puzzle_type, &in_ptr);
     setup(start_puzzle);
@@ -315,7 +315,7 @@ void handle_input(int argc, char** argv, int* puzzle_type, FILE** in_ptr_ptr) {
     }
 }
 
-int is_integer(const char* arg) {
+int is_integer(char const* arg) {
     char* endptr;
     errno = 0;
     long value = strtol(arg, &endptr, 10);
