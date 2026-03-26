@@ -156,7 +156,7 @@ void record_vis_grid(int size) {
 int main() {
     int grid_size = 45;
 
-    prep_vis_grid(grid_size);
+    prep_vis_grid(grid_size, 8);
     set_vis_block_color(2, GREEN, 1, 0);
     set_vis_block_color(1, WHITE, 0, 0);
     set_vis_block_color(2, ROYAL_BLUE, 5, 2);
@@ -166,7 +166,7 @@ int main() {
 
     usleep(25 * 100000);
 
-    prep_vis_grid(grid_size);
+    prep_vis_grid(grid_size, 8);
     set_vis_block_color(2, GREEN, 1, 0);
     set_vis_block_color(1, WHITE, 0, 0);
     set_vis_block_color(2, BLUE, 5, 2);
@@ -175,7 +175,7 @@ int main() {
 
     usleep(25 * 100000);
 
-    prep_vis_grid(grid_size);
+    prep_vis_grid(grid_size, 8);
     set_vis_block_color(2, GREEN, 1, 0);
     set_vis_block_color(1, WHITE, 0, 0);
     set_vis_block_color(2, BLUE, 5, 2);
@@ -193,7 +193,7 @@ int main() {
 
     COLOR blocks[] = {ROYAL_BLUE, ORANGE, MAGENTA, CYAN, RED};
     def_block_colors((int*)blocks, 5);
-    prep_vis_grid(grid_size);
+    prep_vis_grid(grid_size, 8);
     set_vis_block_color(2, GREEN, 1, 0);
     set_vis_block_color(1, WHITE, 0, 0);
     set_vis_block_color(2, BLUE, 5, 2);
