@@ -62,3 +62,10 @@ logs/
 
 # vscode directory
 .vscode/
+
+# executables
+vis
+puz
+sol_cli_dev
+sol_cli_prog
+sol_cli

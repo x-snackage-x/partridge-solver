@@ -30,7 +30,7 @@ $(VIS_ODIR):
 	mkdir -p $@
 
 vis: $(VIS_OBJS)
-	$(CC) -o vis.out $^ $(LIBS)
+	$(CC) -o vis $^ $(LIBS)
 
 # --------------------
 # PUZ
@@ -45,7 +45,7 @@ $(PUZ_ODIR):
 	mkdir -p $@
 
 puz: $(PUZ_OBJS)
-	$(CC) -o puz.out $^ $(LIBS)
+	$(CC) -o puz $^ $(LIBS)
 
 # --------------------
 # SOL
@@ -66,7 +66,7 @@ $(SOL_ODIR):
 	mkdir -p $@
 
 sol: $(SOL_OBJS)
-	$(CC) -o sol_cli_dev.out $^ $(LIBS)
+	$(CC) -o sol_cli_dev $^ $(LIBS)
 
 # Dev and progress_mode build
 SOL_PROG_ODIR=obj/sol_prog
@@ -83,7 +83,7 @@ $(SOL_PROG_ODIR):
 	mkdir -p $@
 
 sol_prog: $(SOL_OBJS)
-	$(CC) -o sol_cli_prog.out -DBUILD_PROGRESS $^ $(LIBS)
+	$(CC) -o sol_cli_prog -DBUILD_PROGRESS $^ $(LIBS)
 
 # Prod Linux build 
 sol_opt:CFLAGS=-Wall $(PROD_FLAGS)
@@ -101,7 +101,7 @@ $(SOL_OPT_ODIR):
 	mkdir -p $@
 
 sol_opt: $(SOL_OBJS)
-	$(CC) -o sol_cli.out $^ $(LIBS)
+	$(CC) -o sol_cli $^ $(LIBS)
 
 # Prod MinGW Windows build:
 sol_win:CFLAGS=-Wall $(PROD_FLAGS)
@@ -149,4 +149,4 @@ sol_WASM: | $(SOL_WEB_ODIR)
 
 # --------------------
 clean:
-	rm -rf obj *.out *.exe
+	rm -rf obj vis puz sol_cli_dev sol_cli_prog sol_cli *.out *.exe
