@@ -92,6 +92,10 @@ int main(int argc, char* argv[]) {
         fprintf(log_fptr, "\n");
     }
 
+#ifdef BUILD_PROGRESS
+    init_terminal(true);
+#endif
+
     if(visualizer_set) {
         visualizer_set = init_terminal(true);
     }

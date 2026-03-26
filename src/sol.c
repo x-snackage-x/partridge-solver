@@ -173,7 +173,25 @@ bool solution_search() {
             printf("Current iter.: %'" PRIu64 " - Tree Size: %'zu Nodes",
                    loop_n, placement_record.tree_size);
             fflush(stdout);
+#ifdef BUILD_PROGRESS
+            if(loop_n % 10000000 == 0) {
+                printf("\n");
+                prep_vis_grid(my_puzzle->grid_dimension, my_puzzle->size);
+                puz_entry* journal_entry = get_first_entry();
+                int entries = get_puz_journal_size();
+                for(int i = 0; i < entries; ++i) {
+                    set_vis_block(journal_entry->type, journal_entry->x_pos,
+                                  journal_entry->y_pos);
+                    ++journal_entry;
+                }
+                render_vis_grid(my_puzzle->grid_dimension);
+                record_vis_grid(my_puzzle->grid_dimension);
+            } else {
+                printf("\r");
+            }
+#else
             printf("\r");
+#endif
         }
 
         line_scan_hor(my_puzzle, &result_buffer);

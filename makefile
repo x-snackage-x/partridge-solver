@@ -68,6 +68,23 @@ $(SOL_ODIR):
 sol: $(SOL_OBJS)
 	$(CC) -o sol_cli_dev.out $^ $(LIBS)
 
+# Dev and progress_mode build
+SOL_PROG_ODIR=obj/sol_prog
+SOL_OBJS= $(SOL_PROG_ODIR)/elhaylib.o \
+        	$(SOL_PROG_ODIR)/vis.o \
+        	$(SOL_PROG_ODIR)/puz.o \
+        	$(SOL_PROG_ODIR)/sol.o \
+			$(SOL_PROG_ODIR)/sol_cli.o
+
+$(SOL_PROG_ODIR)/%.o: $(SDIR)/%.c $(DEPS) | $(SOL_PROG_ODIR)
+	$(CC) -c $(INC) $(CFLAGS) -DBUILD_PROGRESS $< -o $@
+
+$(SOL_PROG_ODIR):
+	mkdir -p $@
+
+sol_prog: $(SOL_OBJS)
+	$(CC) -o sol_cli_prog.out -DBUILD_PROGRESS $^ $(LIBS)
+
 # Prod Linux build 
 sol_opt:CFLAGS=-Wall $(PROD_FLAGS)
 SOL_OPT_ODIR=obj/sol_opt
